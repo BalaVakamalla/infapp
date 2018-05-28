@@ -26,10 +26,10 @@ level = int(input("Enter 0 to SWITCH OFF LED or 1 to SWITCH ON "))
 
 if (level == 0): 
 	GPIO.output(LED_PIN, False)
-	HTTPS_REQUEST_PAYLOAD = """{"state" : {	"reported" : {"LED" : "OFF"}}}"""
+	HTTPS_REQUEST_PAYLOAD = """{"state" : {	"reported" : {"ID": "USER1", "COLOR" : "GREEN", "STATE" : "OFF"}}}"""
 elif (level == 1):
 	GPIO.output(LED_PIN, True)
-	HTTPS_REQUEST_PAYLOAD = """{"state" : {"reported" : {"LED" : "ON"}}}"""
+	HTTPS_REQUEST_PAYLOAD = """{"state" : {"reported" : {"ID": "USER1", "COLOR" : "GREEN", "STATE" : "ON"}}}"""
 
 
 # Construct URL for Post Request 
