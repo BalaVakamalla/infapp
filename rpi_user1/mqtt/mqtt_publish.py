@@ -15,8 +15,13 @@ MQTT_PORT = 8883
 MQTT_KEEPALIVE_INTERVAL = 45
 MQTT_TOPIC1 = "boiler/flowtemp"
 MQTT_TOPIC2 = "boiler/waterpressure"
-MQTT_MSG_ON = "flowtemp:50"
-MQTT_MSG_OFF = "waterpressure:0.8"
+MQTT_MSG_ON = '''{
+		"flowtemp": 50,
+		"waterpressure": 1,
+		"IonisationVolt": 85,
+		"fanspeed": 2200
+	      }'''
+MQTT_MSG_OFF = "faultcode:F46"
 
 
 #MQTT_HOST = "a1wwkwvws5h8go.iot.us-west-2.amazonaws.com"
