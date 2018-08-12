@@ -13,16 +13,21 @@ GPIO.setup(LED_PIN, GPIO.OUT)
 # Define Variables
 MQTT_PORT = 8883
 MQTT_KEEPALIVE_INTERVAL = 45
-MQTT_TOPIC = "rpi/user1"
-MQTT_MSG_ON = "SWITCHING OFF LED1 "
-MQTT_MSG_OFF = "SWITCHING OF LED1 "
+MQTT_TOPIC1 = "boiler/flowtemp"
+MQTT_TOPIC2 = "boiler/waterpressure"
+MQTT_MSG_ON = "flowtemp:50"
+MQTT_MSG_OFF = "waterpressure:0.8"
 
 
-MQTT_HOST = "a1wwkwvws5h8go.iot.us-west-2.amazonaws.com"
+#MQTT_HOST = "a1wwkwvws5h8go.iot.us-west-2.amazonaws.com"
+#CA_ROOT_CERT_FILE = "../certs/root-CA.crt"
+#THING_CERT_FILE = "../certs/9e70d62d62-certificate.pem.crt"
+#THING_PRIVATE_KEY = "../certs/9e70d62d62-private.pem.key"
+
+MQTT_HOST = "a1qvp87d3vdcq7.iot.us-west-2.amazonaws.com"
 CA_ROOT_CERT_FILE = "../certs/root-CA.crt"
-THING_CERT_FILE = "../certs/9e70d62d62-certificate.pem.crt"
-THING_PRIVATE_KEY = "../certs/9e70d62d62-private.pem.key"
-
+THING_CERT_FILE = "../certs/36628caa7d-certificate.pem.crt"
+THING_PRIVATE_KEY = "../certs/36628caa7d-private.pem.key"
 
 # Define on_publish event function
 def on_publish(client, userdata, mid):
@@ -43,10 +48,10 @@ mqttc.connect(MQTT_HOST, MQTT_PORT, MQTT_KEEPALIVE_INTERVAL)
 mqttc.loop_start()
 
 while True:
-	mqttc.publish(MQTT_TOPIC, MQTT_MSG_ON, qos=1)
+	mqttc.publish(MQTT_TOPIC1, MQTT_MSG_ON, qos=1)
 	GPIO.output(LED_PIN, True)
 	time.sleep(2)
-	mqttc.publish(MQTT_TOPIC, MQTT_MSG_OFF, qos=1)
+	mqttc.publish(MQTT_TOPIC2, MQTT_MSG_OFF, qos=1)
 	GPIO.output(LED_PIN, False)	
 	time.sleep(2)
 

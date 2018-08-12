@@ -5,17 +5,23 @@ import ssl
 # Define Variables
 MQTT_PORT = 8883
 MQTT_KEEPALIVE_INTERVAL = 45
-MQTT_TOPIC = "rpi/user1"
+MQTT_TOPIC1 = "boiler/flowtemp"
+MQTT_TOPIC2 = "boiler/waterpressure"
 
-MQTT_HOST = "a1wwkwvws5h8go.iot.us-west-2.amazonaws.com"
+#MQTT_HOST = "a1wwkwvws5h8go.iot.us-west-2.amazonaws.com"
+#CA_ROOT_CERT_FILE = "../certs/root-CA.crt"
+#THING_CERT_FILE = "../certs/9e70d62d62-certificate.pem.crt"
+#THING_PRIVATE_KEY = "../certs/9e70d62d62-private.pem.key"
+
+MQTT_HOST = "a1qvp87d3vdcq7.iot.us-west-2.amazonaws.com"
 CA_ROOT_CERT_FILE = "../certs/root-CA.crt"
-THING_CERT_FILE = "../certs/9e70d62d62-certificate.pem.crt"
-THING_PRIVATE_KEY = "../certs/9e70d62d62-private.pem.key"
+THING_CERT_FILE = "../certs/36628caa7d-certificate.pem.crt"
+THING_PRIVATE_KEY = "../certs/36628caa7d-private.pem.key"
 
 # Define on connect event function
 # We shall subscribe to our Topic in this function
 def on_connect(self, mosq, obj, rc):
-    mqttc.subscribe(MQTT_TOPIC, 0)
+    mqttc.subscribe(MQTT_TOPIC1, 0)
 
 # Define on_message event function. 
 # This function will be invoked every time,
@@ -26,7 +32,7 @@ def on_message(mosq, obj, msg):
 	print ("Payload: " + str(msg.payload))
 
 def on_subscribe(mosq, obj, mid, granted_qos):
-    print ("Subscribed to Topic: " + MQTT_TOPIC + " with QoS: " + str(granted_qos))
+    print ("Subscribed to Topic: " + MQTT_TOPIC1 + " with QoS: " + str(granted_qos))
 
 # Initiate MQTT Client
 mqttc = mqtt.Client()
