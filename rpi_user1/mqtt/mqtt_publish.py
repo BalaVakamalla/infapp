@@ -5,6 +5,8 @@ import paho.mqtt.client as mqtt
 import json
 import time
 import RPi.GPIO as GPIO
+import datetime 
+
 LED_PIN = 11
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)
@@ -15,12 +17,18 @@ MQTT_PORT = 8883
 MQTT_KEEPALIVE_INTERVAL = 45
 MQTT_TOPIC1 = "boiler/flowtemp"
 MQTT_TOPIC2 = "boiler/waterpressure"
-MQTT_MSG_ON = '''{
-		"flowtemp": 50,
-		"waterpressure": 1,
-		"IonisationVolt": 85,
-		"fanspeed": 2200
-	      }'''
+
+temp_data = {}
+temp_data['date'] =  str(time.strftime('%Y-%m-%d'))
+temp_data['time'] =  str(time.strftime('%H-%M-%S'))
+temp_data['utc'] =   str(int(time.time()))
+temp_data['flowtemp'] = '50'
+temp_data['waterpressure'] = '1'
+temp_data['IonisationVolt'] = '85'
+temp_data['fanspeed'] = '2200'
+
+MQTT_MSG_ON=json.dumps(temp_data)
+
 MQTT_MSG_OFF = "faultcode:F46"
 
 
