@@ -6,3 +6,4 @@ Python dependencies
 run the pacakge script as 
 sudo ./pkg_script.sh
 
+Directory ddb contains code for AWS Dynamodb
