@@ -79,7 +79,7 @@ while True:
 
 	cur_time = time.time()
 	data_dict['deviceid'] = 'gateway01'
-	data_dict['time'] = cur_time
+	data_dict['timestamp'] = cur_time
 	n = 0
 	for j in cmd_list:
 		if j == "currenterror":
