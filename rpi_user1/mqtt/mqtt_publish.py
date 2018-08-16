@@ -5,6 +5,23 @@ import paho.mqtt.client as mqtt
 import json
 import time
 import RPi.GPIO as GPIO
+import subprocess
+import shlex
+import re
+import time
+
+
+#List of commands
+cmd_list =      ["flowtemp",
+                "waterpressure",
+                "IonisationVoltageLevel",
+                "fanspeed",
+                "currenterror"]
+
+#Array of datas to be stored and dictionary for indexing also declared
+arr_data = []
+data_dict = {}
+
 LED_PIN = 11
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)
@@ -13,15 +30,12 @@ GPIO.setup(LED_PIN, GPIO.OUT)
 # Define Variables
 MQTT_PORT = 8883
 MQTT_KEEPALIVE_INTERVAL = 45
-MQTT_TOPIC1 = "boiler/flowtemp"
-MQTT_TOPIC2 = "boiler/waterpressure"
-MQTT_MSG_ON = '''{
-		"flowtemp": 50,
-		"waterpressure": 1,
-		"IonisationVolt": 85,
-		"fanspeed": 2200
-	      }'''
-MQTT_MSG_OFF = "faultcode:F46"
+MQTT_TOPIC1 = "EBUS: boiler/data"
+#MQTT_TOPIC2 = "OPENTHERM: boiler/data"
+#MQTT_TOPIC3 = "EMS: boiler/data"
+#MQTT_TOPIC2 = "boiler/waterpressure"
+#MQTT_MSG_ON = '''{ "utctime":1111,"flowtemp": 50,"waterpressure": 1,"IonisationVolt": 86,"fanspeed": 2200   }'''
+#MQTT_MSG_OFF = '''{"faultcode":"F46"}'''
 
 
 #MQTT_HOST = "a1wwkwvws5h8go.iot.us-west-2.amazonaws.com"
@@ -53,12 +67,34 @@ mqttc.connect(MQTT_HOST, MQTT_PORT, MQTT_KEEPALIVE_INTERVAL)
 mqttc.loop_start()
 
 while True:
-	mqttc.publish(MQTT_TOPIC1, MQTT_MSG_ON, qos=1)
+	arr_data[:] = []
+	for i in cmd_list:
+		cmd_arr = "ebusctl r -m 10 {}".format(i)
+	        args =  shlex.split(cmd_arr)
+		cmd_output = subprocess.Popen(args,stdout=subprocess.PIPE)
+	        result = cmd_output.communicate()
+        	temp_result = result[0]
+		final_result = re.split('; |,|\:|\n|\;',temp_result)
+        	arr_data.append(final_result[0])
+
+	cur_time = time.time()
+	data_dict['deviceid'] = 'gateway01'
+	data_dict['time'] = cur_time
+	n = 0
+	for j in cmd_list:
+		if j == "currenterror":
+	                data_dict[j] = arr_data[n]
+		else:
+        	        data_dict[j] = float(arr_data[n])
+		n = n+1
+	print(data_dict)
+	payload = json.dumps(data_dict)
+	mqttc.publish(MQTT_TOPIC1, payload, qos=1)
 	GPIO.output(LED_PIN, True)
 	time.sleep(2)
-	mqttc.publish(MQTT_TOPIC2, MQTT_MSG_OFF, qos=1)
-	GPIO.output(LED_PIN, False)	
-	time.sleep(2)
+#	mqttc.publish(MQTT_TOPIC2, MQTT_MSG_OFF, qos=1)
+#	GPIO.output(LED_PIN, False)	
+#	time.sleep(2)
 
 # Disconnect from MQTT_Broker
 # mqttc.disconnect()
