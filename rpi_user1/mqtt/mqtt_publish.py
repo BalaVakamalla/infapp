@@ -30,7 +30,7 @@ GPIO.setup(LED_PIN, GPIO.OUT)
 # Define Variables
 MQTT_PORT = 8883
 MQTT_KEEPALIVE_INTERVAL = 45
-MQTT_TOPIC1 = "EBUS: boiler/data"
+MQTT_TOPIC1 = "boiler/data"
 #MQTT_TOPIC2 = "OPENTHERM: boiler/data"
 #MQTT_TOPIC3 = "EMS: boiler/data"
 #MQTT_TOPIC2 = "boiler/waterpressure"
@@ -87,7 +87,6 @@ while True:
 		else:
         	        data_dict[j] = float(arr_data[n])
 		n = n+1
-	print(data_dict)
 	payload = json.dumps(data_dict)
 	mqttc.publish(MQTT_TOPIC1, payload, qos=1)
 	GPIO.output(LED_PIN, True)
