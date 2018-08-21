@@ -30,20 +30,7 @@ MQTT_TOPIC1 = "boiler/data"
 #MQTT_TOPIC3 = "EMS: boiler/data"
 #MQTT_TOPIC2 = "boiler/waterpressure"
 #MQTT_MSG_ON = '''{ "utctime":1111,"flowtemp": 50,"waterpressure": 1,"IonisationVolt": 86,"fanspeed": 2200   }'''
-#MQTT_MSG_OFF = '''{"faultcode":"F46"}'''
-MQTT_TOPIC1 = "boiler/flowtemp"
-MQTT_TOPIC2 = "boiler/waterpressure"
 
-temp_data = {}
-temp_data['date'] =  str(time.strftime('%Y-%m-%d'))
-temp_data['time'] =  str(time.strftime('%H-%M-%S'))
-temp_data['utc'] =   str(int(time.time()))
-temp_data['flowtemp'] = '50'
-temp_data['waterpressure'] = '1'
-temp_data['IonisationVolt'] = '85'
-temp_data['fanspeed'] = '2200'
-
-MQTT_MSG_ON=json.dumps(temp_data)
 
 MQTT_MSG_OFF = "faultcode:F46"
 
@@ -89,7 +76,7 @@ while True:
 
 	cur_time = time.time()
 	data_dict['deviceid'] = 'gateway01'
-	data_dict['timestamp'] = cur_time
+	data_dict['timestamp'] = int(cur_time)
 	n = 0
 	for j in cmd_list:
 		if j == "currenterror":
@@ -98,8 +85,9 @@ while True:
         	        data_dict[j] = float(arr_data[n])
 		n = n+1
 	payload = json.dumps(data_dict)
+	print(data_dict)
 	mqttc.publish(MQTT_TOPIC1, payload, qos=1)
-	GPIO.output(LED_PIN, True)
+#	GPIO.output(LED_PIN, True)
 	time.sleep(2)
 #	mqttc.publish(MQTT_TOPIC2, MQTT_MSG_OFF, qos=1)
 #	GPIO.output(LED_PIN, False)	
