@@ -76,19 +76,23 @@ while True:
 
 	cur_time = time.time()
 	data_dict['deviceid'] = 'gateway01'
-	data_dict['timestamp'] = int(cur_time)
+	data_dict['date'] = str(time.strftime('%Y-%m-%d'))
+	data_dict['time'] = str(time.strftime('%H-%M-%S'))
 	n = 0
 	for j in cmd_list:
 		if j == "currenterror":
-	                data_dict[j] = arr_data[n]
+			if  arr_data[n] == '-':
+ 		                data_dict[j] = str(arr_data[n])
+			else:
+				data_dict[j] = str('F'+arr_data[n])
 		else:
         	        data_dict[j] = float(arr_data[n])
 		n = n+1
 	payload = json.dumps(data_dict)
-	print(data_dict)
+#	print(data_dict)
 	mqttc.publish(MQTT_TOPIC1, payload, qos=1)
 #	GPIO.output(LED_PIN, True)
-	time.sleep(2)
+	time.sleep(5)
 #	mqttc.publish(MQTT_TOPIC2, MQTT_MSG_OFF, qos=1)
 #	GPIO.output(LED_PIN, False)	
 #	time.sleep(2)
