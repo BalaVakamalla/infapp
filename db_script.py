@@ -14,6 +14,7 @@ import ssl
 import json
 
 
+
 MQTT_PORT = 8883
 MQTT_KEEPALIVE_INTERVAL = 45
 MQTT_TOPIC1 = "diag/dev"
