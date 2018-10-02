@@ -268,6 +268,11 @@ def find_peak_low(index, noof_rcrd):
     i=0
     peak_found=low_found=0
     #finding peak - step 2
+    
+    #######################
+
+    high_peak=low_peak=peak_found=low_found=0
+    #finding peak - step 2
     while i < length:
         #count determines the first record and stroes the value as previous value for calculation
         if count == 1:
@@ -278,38 +283,38 @@ def find_peak_low(index, noof_rcrd):
             #checking whether the next increased rate is greater than 0.5 or not and calculating the change in rate
             if crnt_val-prv_val>0.1:
                 if i!=length-1:
-                    if (calc_data[i+1][0])-crnt_val>0.1:
-                        high_peak=crnt_val
-                        peak_found=1
-                        print("high peak"+str(crnt_val))
-                        rate_inc=((crnt_val-prv_val)/prv_val)*100
-                        print("incrate "+str(rate_inc)+"%")
-                        break
+                   # if (calc_data[i+1][0])-crnt_val>=0.1:
+                   #     if calc_data[i][1] > 45:
+                   if (crnt_val > high_peak):
+                       high_peak=crnt_val
+                       peak_found=1
+                       pi=i
+                       print("high peak"+str(crnt_val))
+                       rate_inc=((crnt_val-prv_val)/prv_val)*100
+                       print("incrate "+str(rate_inc)+"%")
             prv_val=crnt_val
         i+=1
+       # print("high peak"+str(high_peak))
     #finding low when peak is there - step 3
-    #if(peak_found==1):
-    while i < length:
-        if count1 == 1:
-            count1=0
-        #count determines the first record and stroes the value as previous value for calculation
-            prv_val=calc_data[i][0]
-        else:
+    if(peak_found==1):
+        i=0
+        prv_val=calc_data[i][0]
+        low_peak = prv_val
+        while i < length:
             crnt_val=calc_data[i][0]
             #calculating the rate of decrease and deciding the assumed low peak
             if prv_val-crnt_val>0.1:
                 if i!=length-1:
-                   #if crnt_val-(calc_data[i+1][0])>=0.1:
-                   assm_low_peak=crnt_val
-                   low_found=1
-                   print("low peak"+str(crnt_val))
-                   rate_dcr=((prv_val-crnt_val)/prv_val)*100
-                   print("decrate "+str(rate_dcr)+"%")
-                   break
+                    if (crnt_val < low_peak):
+                        low_peak=crnt_val
+                        low_found=1
+                        print("low peak"+str(crnt_val))
+                        rate_dcr=((prv_val-crnt_val)/prv_val)*100
+                        print("decrate "+str(rate_dcr)+"%")
             prv_val=crnt_val
-        i+=1
+            i+=1
 
-    if peak_found== 1 and low_found==1:# and rate_inc>5:
+    if peak_found== 1: #and low_found==1:# and rate_inc>5:
         print("################################")
         print("Error: Replace pressure sensor ")
         payload = {}
