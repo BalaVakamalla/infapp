@@ -106,8 +106,7 @@ while True:
                    #     print("Replace pressure sensor")
             elif arr_data[-1] == 0:
                 flag = 1
-            elif arr_data[-1] == 32:
-                print ("!!!!!!!!!!!! Error - Fan fault !!!!!!!!!!!")
+
             else:
                 print("!!!!!!! Failed to detect Algorithm !!!!!!!!")
 
