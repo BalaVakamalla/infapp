@@ -37,18 +37,18 @@ mqttc.loop_start()
 
 #####################################################################
 # The function calculates the total change in rate                  #
-# Returns the value of total change in rate                         #                                   
+# Returns the value of total change in rate                         #
 #####################################################################
 def change_in_rate(param, index, noof_rcrd):
 
     #Table name declaration
     sqlite_db = 'boiler_data.db'    # name of the sqlite database file
-    table_name = 'ebus_data'  # name of the table  
+    table_name = 'ebus_data'  # name of the table
 
     # Connect to sqlite database
     conn = sqlite3.connect(sqlite_db)
     crsr = conn.cursor()
-    
+
     index_strt = index - noof_rcrd
     if index_strt==0:
         index_strt=1
@@ -59,7 +59,7 @@ def change_in_rate(param, index, noof_rcrd):
     total_change_rate=0
     for i in calc_data:
         #count determines the first record and stroes the value as previous value for calculation
-        if count == 1: 
+        if count == 1:
             count=0
             prv_val=i[0]
         else:
@@ -84,7 +84,7 @@ def change_in_rate(param, index, noof_rcrd):
 
 #####################################################################
 # The function calculates the rate of increase and peak value        #
-# Returns the value whether increased or decreased                  #                                   
+# Returns the value whether increased or decreased                  #
 #####################################################################
 def change_in_inc_dcr(index, noof_rcrd):
     #Table name declaration
@@ -121,6 +121,7 @@ def change_in_inc_dcr(index, noof_rcrd):
                             peak_found=1
                             print("high peak"+str(crnt_val))
                             rate_inc=((crnt_val-prv_val)/prv_val)*100
+                            print("incrate "+str(rate_inc)+"%")
                             break
 
             prv_val=crnt_val
@@ -141,6 +142,7 @@ def change_in_inc_dcr(index, noof_rcrd):
                             low_found=1
                             print("low peak"+str(crnt_val))
                             rate_dcr=((prv_val-crnt_val)/prv_val)*100
+                            print("decrate "+str(rate_dcr)+"%")
             prv_val=crnt_val
             i+=1
 
@@ -169,7 +171,7 @@ def change_in_inc_dcr(index, noof_rcrd):
 ###################################################################################################3
 #####################################################################
 # The function decides whether ther is change or not                #
-# Returns 1 if changed or else 0                                    #                                   
+# Returns 1 if changed or else 0                                    #
 #####################################################################
 def change_in_values(param_ID, index, noof_rcrd):
     #Table name declaration
@@ -194,7 +196,7 @@ def change_in_values(param_ID, index, noof_rcrd):
         else:
             crnt_val=i[0]
             #condition to check whether the value got changed in betweeen or not
-            if crnt_val != prv_val and ((crnt_val-prv_val >0.1) or (prv_val-crnt_val >0.1)): 
+            if crnt_val != prv_val and ((crnt_val-prv_val >0.1) or (prv_val-crnt_val >0.1)):
                 change_in_val = 1
             prv_val=crnt_val
 
@@ -207,7 +209,7 @@ def change_in_values(param_ID, index, noof_rcrd):
 ###################################################################################################3
 #####################################################################
 # The function decides whether there is change in delta                #
-# Returns delta                                    #                                   
+# Returns delta                                    #
 #####################################################################
 def change_in_delta( index, noof_rcrd):
         #Table name declaration
@@ -235,3 +237,88 @@ def change_in_delta( index, noof_rcrd):
              print("!!! difference is greater than 0.5!!!")
              break;
          return i
+
+#####################################################################
+# The function calculates the rate of increase and peak value        #
+# Returns the value whether increased or decreased                  #
+#####################################################################
+def find_peak_low(index, noof_rcrd):
+    #Table name declaration
+    sqlite_db = 'boiler_data.db'    # name of the sqlite database file
+    table_name = 'ebus_data'  # name of the table
+
+    # Connect to sqlite database
+    conn = sqlite3.connect(sqlite_db)
+    crsr = conn.cursor()
+    index_strt = index - noof_rcrd
+    if index_strt==0:
+        index_strt=1
+    #fetching the data from the sqlite on the basis of index no
+    sql_data=crsr.execute('SELECT flow_temp,Ionisation_volt_level FROM {tn} WHERE row_num BETWEEN {strt} AND {end}'.format(tn=table_name, strt=index_strt, end=index))
+    calc_data=sql_data.fetchall()
+    count=1
+    length=len(calc_data)
+    i=0
+    peak_found=low_found=0
+    #finding peak - step 2
+    while i < length:
+        #count determines the first record and stroes the value as previous value for calculation
+        if count == 1:
+            count=0
+            prv_val=calc_data[i][0]
+        else:
+            crnt_val=calc_data[i][0]
+            #checking whether the next increased rate is greater than 0.5 or not and calculating the change in rate
+            if crnt_val-prv_val>0.5:
+                if i!=length-1:
+                    if (calc_data[i+1][0])-crnt_val>0.5:
+                        high_peak=crnt_val
+                        peak_found=1
+                        print("high peak"+str(crnt_val))
+                        rate_inc=((crnt_val-prv_val)/prv_val)*100
+                        print("incrate "+str(rate_inc)+"%")
+                        break
+            prv_val=crnt_val
+        i+=1
+    #finding low when peak is there - step 3
+    if(peak_found==1):
+        count1=1
+        #count determines the first record and stroes the value as previous value for calculation
+        prv_val=calc_data[i-1][0]
+        while i < length:
+            crnt_val=calc_data[i][0]
+            #calculating the rate of decrease and deciding the assumed low peak
+            if prv_val-crnt_val>0.5:
+                if i!=length-1:
+                    if crnt_val-(calc_data[i+1][0])>0.5:
+                        assm_low_peak=crnt_val
+                        low_found=1
+                        print("low peak"+str(crnt_val))
+                        rate_dcr=((prv_val-crnt_val)/prv_val)*100
+                        print("decrate "+str(rate_dcr)+"%")
+
+            prv_val=crnt_val
+            i+=1
+
+    if peak_found== 1 and low_found==1:# and rate_inc>5:
+        print("################################")
+        print("Error: Replace pressure sensor ")
+        #payload = {}
+        #key = "Error"
+       # value = str(index_strt)+", "+str(index)+", "+"Replace Flame rectification lead"
+        #value = "Replace pressure sensor "
+        #payload[key] = value
+        #data = json.dumps(payload)
+        #mqttc.publish('boiler/data', data, qos=1)
+    else:
+        print("################################")
+        print("Error: Replace pump ")
+        #payload = {}
+        #key = "Error"
+       # value = str(index_strt)+", "+str(index)+", "+"Do you have gas supply? Check to see if your other gas appliances are working. If they are, please reply Yes to this message to book in an engineer visit"
+        #value = "Replace pump"
+        #payload[key] = value
+        #data = json.dumps(payload)
+        #mqttc.publish('boiler/data', data, qos=1)
+
+    return 0
