@@ -151,7 +151,7 @@ def change_in_inc_dcr(index, noof_rcrd):
         print("Replace Flame rectification lead")
         payload = {}
         key = "Error"
-        value = "Replace Flame rectification lead"
+        value = "Hi Bryn, it looks like you’re having trouble with your boiler, no problem, you’re covered by HomeServe and we are here to help! Your engineer, Chris has ordered a replacement rectification cable for your Vaillant boiler and will be in touch within the hour to book a repair visit."
         payload[key] = value
         data = json.dumps(payload)
         mqttc.publish('boiler/data', data, qos=1)
@@ -165,7 +165,7 @@ def change_in_inc_dcr(index, noof_rcrd):
         payload = {}
         key = "Error"
        # value = str(index_strt)+", "+str(index)+", "+"Do you have gas supply? Check to see if your other gas appliances are working. If they are, please reply Yes to this message to book in an engineer visit"
-        value = "Do you have gas supply? Check to see if your other gas appliances are working. If they are, please reply Yes to this message to book in an engineer visit"
+        value = "Hi Bryn, it looks like you’re having trouble with your boiler, no problem, you’re covered by HomeServe and we are here to help! Click here to troubleshoot the cause, which may be the gas supply to your property. If not, HomeServe are on hand to get you back up and running as quickly as possible. https://www.youtube.com/watch?v=JMFlU3-gEJ4"
         payload[key] = value
         data = json.dumps(payload)
         mqttc.publish('boiler/data', data, qos=1)
@@ -320,7 +320,7 @@ def find_peak_low(index, noof_rcrd):
         payload = {}
         key = "Error"
        # value = str(index_strt)+", "+str(index)+", "+"Replace Flame rectification lead"
-        value = "Replace pressure sensor "
+        value = "Hi Bryn, it looks like you’re having trouble with your boiler, no problem, you’re covered by HomeServe and we are here to help! Your engineer, Chris has ordered a replacement F75 pressure sensor for your Vaillant boiler and will be in touch within the hour to book a repair visit. "
         payload[key] = value
         data = json.dumps(payload)
         mqttc.publish('boiler/data', data, qos=1)
@@ -330,7 +330,7 @@ def find_peak_low(index, noof_rcrd):
         payload = {}
         key = "Error"
        # value = str(index_strt)+", "+str(index)+", "+"Do you have gas supply? Check to see if your other gas appliances are working. If they are, please reply Yes to this message to book in an engineer visit"
-        value = "Replace pump"
+        value = "Hi Bryn, it looks like you’re having trouble with your boiler, no problem, you’re covered by HomeServe and we are here to help! Your engineer, Chris has ordered a replacement pump for your Vaillant boiler and will be in touch within the hour to book a repair visit."
         payload[key] = value
         data = json.dumps(payload)
         mqttc.publish('boiler/data', data, qos=1)
