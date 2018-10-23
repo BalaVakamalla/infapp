@@ -22,8 +22,8 @@ if [ ! id -u ggc_user &>/dev/null ]; then
 fi
 
 Download certs from S3 using CURL
-#
-#
+# use cURL to download certificates from the s3 bucket 
+# according to the device id of the current device
 #
 
 
