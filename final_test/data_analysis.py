@@ -146,12 +146,13 @@ def change_in_inc_dcr(index, noof_rcrd):
             prv_val=crnt_val
             pi+=1
 
-    if peak_found== 1 and low_found==1 and rate_inc>2:
+    if peak_found== 1 and low_found==1 and rate_inc>5:
         print("################################")
         print("Replace Flame rectification lead")
         payload = {}
         key = "Error"
-        value = " rectification cable for your Vaillant boiler and will be in touch within the hour to book a repair visit."
+        value = str("Hi Bryn, it looks like you are having trouble with your boiler, no problem, you are covered by HomeServe and we are here to help, Your engineer, Chris has ordered a replacement rectification cable for your Vaillant boiler and will be in touch within the hour to book a repair visit :-) ")
+       # value = " rectification cable for your Vaillant boiler and will be in touch within the hour to book a repair visit."
         payload[key] = value
         data = json.dumps(payload)
         mqttc.publish('boiler/data', data, qos=1)
@@ -164,7 +165,8 @@ def change_in_inc_dcr(index, noof_rcrd):
         print("Do you have gas supply? Check to see if your other gas appliances are working. If they are, please reply Yes to this message to book in an engineer visit")
         payload = {}
         key = "Error"
-        value = str(index_strt)+", "+str(index)+", "+"Do you have gas supply? Check to see if your other gas appliances are working. If they are, please reply Yes to this message to book in an engineer visit"
+      #  value = str(index_strt)+", "+str(index)+", "+"Do you have gas supply? Check to see if your other gas appliances are working. If they are, please reply Yes to this message to book in an engineer visit"
+        value = str("Hi Bryn, it looks like you are having trouble with your boiler, no problem, you are covered by HomeServe and we are here to help! Click here to troubleshoot the cause, which may be the gas supply to your property. If not, HomeServe are on hand to get you back up and running as quickly as possible. https://www.youtube.com/watch?v=JMFlU3-gEJ4'")
         payload[key] = value
         data = json.dumps(payload)
         mqttc.publish('boiler/data', data, qos=1)
@@ -277,9 +279,9 @@ def find_peak_low(index, noof_rcrd):
         if count == 1:
             count=0
             prv_val=calc_data[i][0]
-        else:
-            crnt_val=calc_data[i][0]
+        else :
             #checking whether the next increased rate is greater than 0.5 or not and calculating the change in rate
+            crnt_val=calc_data[i][0]
             if crnt_val-prv_val>0.1:
                 if i!=length-1:
                    # if (calc_data[i+1][0])-crnt_val>=0.1:
@@ -315,21 +317,25 @@ def find_peak_low(index, noof_rcrd):
 
     if peak_found== 1: #and low_found==1:# and rate_inc>5:
         print("################################")
-        print("Error: Replace pressure sensor ")
+        print("Fault detected: Replace pressure sensor ")
         payload = {}
-        key = "Error"
-        value = str(index_strt)+", "+str(index)+", "+"Replace pressure sensor"
+        key = " "
+        #value = str(index_strt)+", "+str(index)+", "+"Replace pressure sensor"
+        value = str("Hi Greg, it looks like you are having trouble with your boiler, no problem, you are covered by HomeServe and we are here to help, Your engineer, Chris has ordered a replacement F75 pressure sensor for your Vaillant boiler and will be in touch within the hour to book a repair visit :-) ")
         payload[key] = value
         data = json.dumps(payload)
-        mqttc.publish('boiler/data', data, qos=1)
+       # mqttc.publish('boiler/data', data, qos=1)
+        mqttc.publish('boiler/data', value, qos=1)
     else:
         print("################################")
-        print("Error: Replace pump ")
+        print("Fault detected: Replace pump ")
         payload = {}
-        key = "Error"
-        value = str(index_strt)+", "+str(index)+", "+"Do you have gas supply? Check to see if your other gas appliances are working. If they are, please reply Yes to this message to book in an engineer visit"
+        key = " "
+        #value = str(index_strt)+", "+str(index)+", "+"supply? Check to see if your other gas appliances are working. If they are, please reply Yes to this message to book in an engineer visit"
+        value = str("Hi Greg, it looks like you are having trouble with your boiler, no problem, you are covered by HomeServe and we are here to help, Your engineer, Chris has ordered a replacement pump for your Vaillant boiler and will be in touch within the hour to book a repair visit. :-) ")
         payload[key] = value
         data = json.dumps(payload)
-        mqttc.publish('boiler/data', data, qos=1)
+        #mqttc.publish('boiler/data', data, qos=1)
+        mqttc.publish('boiler/data', value, qos=1)
 
     return 0
