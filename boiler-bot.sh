@@ -12,10 +12,10 @@ fi
 if [ ! id -u ggc_user &>/dev/null ]
 then
 	sudo adduser --system ggc_user
-        sudo groupadd --system ggc_group
+	sudo groupadd --system ggc_group
 
 	echo "fs.protected_hardlinks = 1" | sudo tee -a /etc/sysctl.d/??-sysctl.conf
-        echo "fs.protected_symlinks = 1" | sudo tee -a /etc/sysctl.d/??-sysctl.conf
+	echo "fs.protected_symlinks = 1" | sudo tee -a /etc/sysctl.d/??-sysctl.conf
 
 	sudo reboot
 fi
