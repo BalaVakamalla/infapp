@@ -20,12 +20,14 @@ then
 	sudo reboot
 fi
 
-#Installing keys into the greengrass device
-if [ ! -e root.ca.pem ]
-then
-	#Download and save ROOT-CA to /greengrass/certs/
-	sudo wget -O /greengrass/certs/root.ca.pem  http://www.symantec.com/content/en/us/enterprise/verisign/roots/VeriSign-Class%203-Public-Primary-Certification-Authority-G5.pem
+#Download and save ROOT-CA to /greengrass/certs/
+sudo wget -O /greengrass/certs/root.ca.pem  http://www.symantec.com/content/en/us/enterprise/verisign/roots/VeriSign-Class%203-Public-Primary-Certification-Authority-G5.pem
 
+#Installing keys into the greengrass device
+count=`ls -1 /greengrass/certs/*.key 2>/dev/null | wc -l`
+while [ count = 0 ]
+do
+	declare -a certExt=("private.key" "public.key" "cert.pem")              ## declare an array with values as certificate extensions
 	for i in "${certExt[@]}"
 	do
 		file="boilerbot/devices-certificates/c48043bb-c0c5-4b44-a5fa-6dac3eff5d78/c48043bb-c0c5-4b44-a5fa-6dac3eff5d78."
@@ -45,7 +47,9 @@ then
 		     -H "Authorization: AWS ${s3Key}:${signature}" \
 		     --fail https://${bucket}.s3.amazonaws.com/${file}$i -o "/greengrass/certs/${file}$i"
 	done
-fi
+	count=`ls -1 /greengrass/certs/*.key 2>/dev/null | wc -l`
+	sleep 30s
+done
 
 # Starting greengrassd
 sudo /greengrass/ggc/core/greengrassd start
