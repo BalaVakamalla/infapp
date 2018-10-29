@@ -29,12 +29,12 @@ while [ count = 0 ]
 do
 	#Downloading the keys
 	declare -a certExt=("private.key" "public.key" "cert.pem")              ## declare an array with values as certificate extensions
-	file="$auth_path"
-	deviceid="$dev_id"
-	bucket="$provisioning_bucket"
+	file=`head -1 /home/inferni/repos/infab/boiler-bot/boiler-config.txt `
+	deviceid=`head -2 /home/inferni/repos/infab/boiler-bot/boiler-config.txt |tail -1`
+	bucket=`head -3 /home/inferni/repos/infab/boiler-bot/boiler-config.txt  |tail -1`
 	dateValue=`date -R`
-	s3Key="$aws_s3_key"
-	s3Secret="$aws_s3_secret"
+	s3Key=`head -4 /home/inferni/repos/infab/boiler-bot/boiler-config.txt  |tail -1`
+	s3Secret=`head -5 /home/inferni/repos/infab/boiler-bot/boiler-config.txt  |tail -1`
 	for i in "${certExt[@]}"
 	do
 		resource="/${bucket}/${file}$i"
@@ -77,13 +77,13 @@ fi
 
 # Start greengrass if not already running
 # If it keeps failing then stop after 5b attempts
-count=0
+#count=0
 gg_pid=`/bin/ps -fu root| grep "greengrass" | grep -v "grep" | awk '{print $2}'`
-while [[ "" = "$gg_pid" ]] && [[ "$count" -ne 5 ]]
+while [[ "" = "$gg_pid" ]] #&& [[ "$count" -ne 5 ]]
 do
 	# Starting greengrassd
 	sudo /greengrass/ggc/core/greengrassd start
-	sleep 20s
-	gg_pid=`/bin/ps -fu root| grep "greengrass" | grep -v "grep" | awk '{print $2}'`
-	count=$((count+1))
+	sleep 5s
+	#gg_pid=`/bin/ps -fu root| grep "greengrass" | grep -v "grep" | awk '{print $2}'`
+	#count=$((count+1))
 done
