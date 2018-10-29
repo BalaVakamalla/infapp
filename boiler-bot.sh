@@ -30,6 +30,7 @@ do
 	#Downloading the keys
 	declare -a certExt=("private.key" "public.key" "cert.pem")              ## declare an array with values as certificate extensions
 	file="$auth_path"
+	deviceid="$dev_id"
 	bucket="$provisioning_bucket"
 	dateValue=`date -R`
 	s3Key="$aws_s3_key"
@@ -46,7 +47,7 @@ do
 		     -H "Date: ${dateValue}" \
 		     -H "Content-Type: ${contentType}" \
 		     -H "Authorization: AWS ${s3Key}:${signature}" \
-		     --fail https://${bucket}.s3.amazonaws.com/${file}$i -o "/greengrass/certs/cert.$i"
+		     --fail https://${bucket}.s3.amazonaws.com/${file}$i -o "/greengrass/certs/$deviceid.$i"
 	done
 
 	#Downloading the config.json file
