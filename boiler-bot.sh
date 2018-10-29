@@ -29,11 +29,11 @@ while [ count = 0 ]
 do
 	#Downloading the keys
 	declare -a certExt=("private.key" "public.key" "cert.pem")              ## declare an array with values as certificate extensions
-	file="boilerbot/devices-certificates/54268963-cc76-4776-b290-cd188563e3e7/54268963-cc76-4776-b290-cd188563e3e7."
-	bucket="boilerbot-provisioning"
+	file="$auth_path"
+	bucket="$provisioning_bucket"
 	dateValue=`date -R`
-	s3Key="AKIAI56LNSUKIXBZWPMQ"
-	s3Secret="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"
+	s3Key="$aws_s3_key"
+	s3Secret="$aws_s3_secret"
 	for i in "${certExt[@]}"
 	do
 		resource="/${bucket}/${file}$i"
@@ -66,5 +66,23 @@ do
 	sleep 30s
 done
 
-# Starting greengrassd
-sudo /greengrass/ggc/core/greengrassd start
+# Start ebusd
+ebus_pid=`/bin/ps -fu root| grep "ebusd" | grep -v "grep" | awk '{print $2}'`
+if [[ "" = "$ebus_pid" ]]
+then
+	sudo /usr/bin/ebusd --scanconfig --lograwdata --receivetimeout=25000
+	ebusctl scan 08
+fi
+
+# Start greengrass if not already running
+# If it keeps failing then stop after 5b attempts
+count=0
+gg_pid=`/bin/ps -fu root| grep "greengrass" | grep -v "grep" | awk '{print $2}'`
+while [[ "" = "$gg_pid" ]] && [[ "$count" -ne 5 ]]
+do
+	# Starting greengrassd
+	sudo /greengrass/ggc/core/greengrassd start
+	sleep 20s
+	gg_pid=`/bin/ps -fu root| grep "greengrass" | grep -v "grep" | awk '{print $2}'`
+	count=$((count+1))
+done

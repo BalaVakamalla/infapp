@@ -2,7 +2,7 @@
 After=network.target
 
 [Service]
-ExecStart=/usr/local/bin/boiler/boiler-bot.sh
+ExecStart=/bin/bash -c "source /usr/local/bin/boiler/boiler-config.sh; source /usr/local/bin/boiler/boiler-bot.sh"
 
 [Install]
 WantedBy=default.target
