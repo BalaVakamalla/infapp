@@ -25,16 +25,17 @@ sudo wget -O /greengrass/certs/root.ca.pem  http://www.symantec.com/content/en/u
 
 #Installing keys into the greengrass device
 count=`ls -1 /greengrass/certs/*.key 2>/dev/null | wc -l`			#checks if the certs are already downloaded
+export $(cat /usr/local/bin/boiler/boiler-config.env | grep -v ^'#' | xargs)
 while [ count = 0 ]
 do
 	#Downloading the keys
 	declare -a certExt=("private.key" "public.key" "cert.pem")              ## declare an array with values as certificate extensions
-	file=`head -1 /home/inferni/repos/infab/boiler-bot/boiler-config.txt `
-	deviceid=`head -2 /home/inferni/repos/infab/boiler-bot/boiler-config.txt |tail -1`
-	bucket=`head -3 /home/inferni/repos/infab/boiler-bot/boiler-config.txt  |tail -1`
+	deviceid="$dev_id"
+	file="$auth_path/$deviceid/$deviceid."
+	bucket="$s3_bucket"
 	dateValue=`date -R`
-	s3Key=`head -4 /home/inferni/repos/infab/boiler-bot/boiler-config.txt  |tail -1`
-	s3Secret=`head -5 /home/inferni/repos/infab/boiler-bot/boiler-config.txt  |tail -1`
+	s3Key="$s3_access"
+	s3Secret="$s3_secret"
 	for i in "${certExt[@]}"
 	do
 		resource="/${bucket}/${file}$i"
@@ -67,6 +68,8 @@ do
 	sleep 30s
 done
 
+#unset dev_id deviceid file auth_path bucket s3_bucket s3Key s3_access s3Secret s3_secret resource stringToSign signature
+
 # Start ebusd
 ebus_pid=`/bin/ps -fu root| grep "ebusd" | grep -v "grep" | awk '{print $2}'`
 if [[ "" = "$ebus_pid" ]]
@@ -75,15 +78,14 @@ then
 	ebusctl scan 08
 fi
 
-# Start greengrass if not already running
-# If it keeps failing then stop after 5b attempts
-#count=0
+# Starts greengrass if not already running
 gg_pid=`/bin/ps -fu root| grep "greengrass" | grep -v "grep" | awk '{print $2}'`
-while [[ "" = "$gg_pid" ]] #&& [[ "$count" -ne 5 ]]
+while [[ "" = "$gg_pid" ]]
 do
 	# Starting greengrassd
 	sudo /greengrass/ggc/core/greengrassd start
 	sleep 5s
-	#gg_pid=`/bin/ps -fu root| grep "greengrass" | grep -v "grep" | awk '{print $2}'`
-	#count=$((count+1))
 done
+
+#exec python /home/ubuntu/final_test/final_db_script.py
+sudo -u ubuntu /home/ubuntu/final_test/final_db_script.py >> log
