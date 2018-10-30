@@ -26,7 +26,7 @@ sudo wget -O /greengrass/certs/root.ca.pem  http://www.symantec.com/content/en/u
 #Installing keys into the greengrass device
 count=`ls -1 /greengrass/certs/*.key 2>/dev/null | wc -l`			#checks if the certs are already downloaded
 export $(cat /usr/local/bin/boiler/boiler-config.env | grep -v ^'#' | xargs)
-while [ count = 0 ]
+while [[ "$count" -eq 0 ]]
 do
 	#Downloading the keys
 	declare -a certExt=("private.key" "public.key" "cert.pem")              ## declare an array with values as certificate extensions
@@ -65,7 +65,11 @@ do
 	     --fail https://${bucket}.s3.amazonaws.com/${file}config.json -o "/greengrass/config/config.json"
 
 	count=`ls -1 /greengrass/certs/*.key 2>/dev/null | wc -l`
-	sleep 30s
+	if [[ "$count" -eq 0 ]]
+	then
+		sleep 30s
+	fi
+
 done
 
 #unset dev_id deviceid file auth_path bucket s3_bucket s3Key s3_access s3Secret s3_secret resource stringToSign signature
@@ -80,7 +84,7 @@ fi
 
 # Starts greengrass if not already running
 gg_pid=`/bin/ps -fu root| grep "greengrass" | grep -v "grep" | awk '{print $2}'`
-while [[ "" = "$gg_pid" ]]
+if [[ "$gg_pid" -eq ""  ]]
 do
 	# Starting greengrassd
 	sudo /greengrass/ggc/core/greengrassd start
