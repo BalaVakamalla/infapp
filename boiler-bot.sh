@@ -76,7 +76,7 @@ done
 
 # Start ebusd
 ebus_pid=`/bin/ps -fu root| grep "ebusd" | grep -v "grep" | awk '{print $2}'`
-if [[ "" = "$ebus_pid" ]]
+if [[ "$ebus_pid" -eq ""  ]]
 then
 	sudo /usr/bin/ebusd --scanconfig --lograwdata --receivetimeout=25000
 	ebusctl scan 08
