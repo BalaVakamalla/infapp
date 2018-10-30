@@ -85,11 +85,11 @@ fi
 # Starts greengrass if not already running
 gg_pid=`/bin/ps -fu root| grep "greengrass" | grep -v "grep" | awk '{print $2}'`
 if [[ "$gg_pid" -eq ""  ]]
-do
+then
 	# Starting greengrassd
 	sudo /greengrass/ggc/core/greengrassd start
 	sleep 5s
-done
+fi
 
 #exec python /home/ubuntu/final_test/final_db_script.py
 sudo -u ubuntu /home/ubuntu/final_test/final_db_script.py >> log
