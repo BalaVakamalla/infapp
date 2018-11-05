@@ -25,7 +25,7 @@ sudo wget -O /greengrass/certs/root.ca.pem  http://www.symantec.com/content/en/u
 
 #Installing keys into the greengrass device
 count=`ls -1 /greengrass/certs/*.key 2>/dev/null | wc -l`			#checks if the certs are already downloaded
-export $(cat /usr/local/bin/boiler/boiler-config.env | grep -v ^'#' | xargs)
+export $(cat ~/final_test/boiler-config.env | grep -v ^'#' | xargs)
 while [[ "$count" -eq 0 ]]
 do
 	#Downloading the keys
@@ -79,7 +79,9 @@ ebus_pid=`/bin/ps -fu root| grep "ebusd" | grep -v "grep" | awk '{print $2}'`
 if [[ "$ebus_pid" -eq ""  ]]
 then
 	sudo /usr/bin/ebusd --scanconfig --lograwdata --receivetimeout=25000
+        sleep 2s
 	ebusctl scan 08
+	pidof ebusd
 fi
 
 # Starts greengrass if not already running
@@ -92,4 +94,4 @@ then
 fi
 
 #exec python /home/ubuntu/final_test/final_db_script.py
-sudo -u ubuntu /home/ubuntu/final_test/final_db_script.py >> log
+/home/ubuntu/final_test/final_db_script.py |& tee -a log
