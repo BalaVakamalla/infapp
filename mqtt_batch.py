@@ -81,10 +81,12 @@ while True:
 	#print(data_dict)
 	#print(payload)
 	batchVal.append(data_dict)
+	data_dict = {}
 	time.sleep(4)
 	rec_count += 1
-	if rec_count == 15:
+	if rec_count == 75:
 		payload = json.dumps(batchVal)
 		client.publish('batch/test', payload, qos=1)
 		batchVal[:] = []
+		data_dict.clear()
 		rec_count = 0
