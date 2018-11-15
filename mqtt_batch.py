@@ -1,4 +1,5 @@
 #!/usr/bin/python
+
 import ssl
 import paho.mqtt.client as mqtt
 import json
@@ -10,7 +11,6 @@ import re
 MQTT_PORT = 8883
 MQTT_KEEPALIVE_INTERVAL = 45
 
-
 MQTT_HOST = "a1qvp87d3vdcq7.iot.us-west-2.amazonaws.com"
 CA_ROOT_CERT_FILE = "/greengrass/certs/root.ca.pem"
 THING_CERT_FILE = "/greengrass/certs/Sandwhich.cert.pem"
@@ -19,7 +19,6 @@ THING_PRIVATE_KEY = "/greengrass/certs/Sandwhich.private.key"
 # Define on_publish event function
 def on_publish(client, userdata, mid):
         print ("Message Published!!")
-
 
 # Initiate MQTT Client
 client = mqtt.Client()
@@ -31,7 +30,7 @@ client.tls_set(CA_ROOT_CERT_FILE, certfile=THING_CERT_FILE, keyfile=THING_PRIVAT
 client.connect(MQTT_HOST, MQTT_PORT, MQTT_KEEPALIVE_INTERVAL)
 client.loop_start()
 
-#List of commands from boiler
+# List of commands from boiler
 cmd_list =      ["flowtemp",
                 "waterpressure",
                 "IonisationVoltageLevel",
@@ -47,11 +46,13 @@ cmd_list =      ["flowtemp",
                 "CounterStartattempts2",
                 "currenterror"]
 
-#Array of datas to be stored and dictionary for indexing also declared
+# Declaring list of datas to be stored and dictionary for indexing
 arr_data = []
 data_dict = {}
-batchVal = []
+batchVal = []	# List containing all 4 second data
+data = {}		# Store data for the JSON payload
 
+# Loop to get the boiler parameters and temporarily store in a list before storing in a dictionary
 rec_count = 0
 while True:
 	arr_data[:] = []
@@ -64,9 +65,11 @@ while True:
 		final_result = re.split('; |,|\:|\n|\;',temp_result)
 		arr_data.append(final_result[0])
 
-	data_dict['utc'] = str(int(time.time()))
-	data_dict['date'] = time.strftime("%x")
-	data_dict['time'] = time.strftime("%X")
+	data_dict['recutc'] = str(int(time.time()))
+	data_dict['recdate'] = time.strftime("%x")
+	data_dict['rectime'] = time.strftime("%X")
+
+	# Loop to store the boiler parameters in a dictionary opposite to the parameter names
 	n = 0
 	for j in cmd_list:
 		if j == "currenterror":
@@ -77,16 +80,20 @@ while True:
 		else:
 			data_dict[j] = float(arr_data[n])
 		n = n+1
-	#payload = json.dumps(data_dict)
-	#print(data_dict)
-	#print(payload)
+
 	batchVal.append(data_dict)
 	data_dict = {}
 	time.sleep(4)
 	rec_count += 1
 	if rec_count == 75:
-		payload = json.dumps(batchVal)
-		client.publish('batch/test', payload, qos=1)
+		data['date'] = time.strftime("%x")
+		data['time'] = time.strftime("%X")
+		data['data'] = batchVal
+		payload = json.dumps(data)
+		client.publish('batch/test', payload, qos=1)	# Send The batched data to topic "batch/test"
+
+		# Clearing the list and dictionaries (arr_data is cleared at the start of the while loop)
 		batchVal[:] = []
 		data_dict.clear()
+		data.clear()
 		rec_count = 0
