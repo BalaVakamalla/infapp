@@ -18,7 +18,7 @@ MQTT_KEEPALIVE_INTERVAL = 45
 
 MQTT_HOST = "a1qvp87d3vdcq7.iot.us-west-2.amazonaws.com"
 CA_ROOT_CERT_FILE = "/greengrass/certs/root.ca.pem"
-THING_CERT_FILE = "/greengrass/certs/" + os.environ["dev_id"] + ".cert.pem" 
+THING_CERT_FILE = "/greengrass/certs/" + os.environ["dev_id"] + ".cert.pem"
 THING_PRIVATE_KEY = "/greengrass/certs/" + os.environ["dev_id"] + ".private.key"
 
 # Define on_publish event function
@@ -271,7 +271,7 @@ def find_peak_low(index, noof_rcrd):
     i=0
     peak_found=low_found=0
     #finding peak - step 2
-    
+
     #######################
 
     high_peak=low_peak=peak_found=low_found=0
