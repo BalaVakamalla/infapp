@@ -7,6 +7,10 @@ import time
 import subprocess
 import shlex
 import re
+import os
+
+devID="a56z1Ush6d54"
+send=False
 
 MQTT_PORT = 8883
 MQTT_KEEPALIVE_INTERVAL = 45
@@ -16,22 +20,46 @@ CA_ROOT_CERT_FILE = "/greengrass/certs/root.ca.pem"
 THING_CERT_FILE = "/greengrass/certs/Sandwhich.cert.pem"
 THING_PRIVATE_KEY = "/greengrass/certs/Sandwhich.private.key"
 
+# Define on_connect event function
+def on_connect(client, userdata, flags, rc):
+	print("Connection returned result: " + str(rc) )
+
 # Define on_publish event function
 def on_publish(client, userdata, mid):
-        print ("Message Published!!")
+	print ("Message Published!!")
+
+# Define on_message event function
+def on_message(client, userdata, msg):
+	print("topic: "+msg.topic)
+    print("payload: "+str(msg.payload))
+    data = json.loads(str(msg.payload))
+	global send, clkStart
+    if data['devID'] == devID:
+		print("Device ID Match!!")
+		send = True
+		clkStart = time.time()
+	else:
+		send = False
 
 # Initiate MQTT Client
 client = mqtt.Client()
-# Register publish callback function
+
+# Register callback functions
+client.on_connect = on_connect
+client.on_message = on_message
 client.on_publish = on_publish
+
 # Configure TLS Set
 client.tls_set(CA_ROOT_CERT_FILE, certfile=THING_CERT_FILE, keyfile=THING_PRIVATE_KEY, cert_reqs=ssl.CERT_REQUIRED, tls_version=ssl.PROTOCOL_TLSv1_2, ciphers=None)
+
 # Connect with MQTT Broker
 client.connect(MQTT_HOST, MQTT_PORT, MQTT_KEEPALIVE_INTERVAL)
+client.subscribe('testin/'+devID , 1 )
 client.loop_start()
+time.sleep(2)
 
 # List of commands from boiler
-cmd_list =      ["flowtemp",
+cmd_list =     	["flowtemp",
                 "waterpressure",
                 "IonisationVoltageLevel",
                 "fanspeed",
@@ -82,15 +110,29 @@ while True:
 		n = n+1
 
 	batchVal.append(data_dict)
-	data_dict = {}
 	time.sleep(4)
 	rec_count += 1
+
+	# Send live data into "'testout/'+devID" on demand triggered on
+	# message with devID same as the devicedID in "'testout/'+devID"
+	if send :
+		if (time.time() - clkStart) < 30:
+			live_payload = json.dumps(data_dict)
+			client.publish('testout/'+devID, live_payload, qos=1)
+			print("Sending live data!!")
+		else:
+			send = False
+			clkStart = 0
+	data_dict = {} # Flush dictionary before storing the next set of 4 sec data
+
+	# Batch the 4 second data to 5 minute intervals
 	if rec_count == 75:
 		data['date'] = time.strftime("%x")
 		data['time'] = time.strftime("%X")
 		data['data'] = batchVal
 		payload = json.dumps(data)
 		client.publish('batch/test', payload, qos=1)	# Send The batched data to topic "batch/test"
+		print("Sending Batch data!!")
 
 		# Clearing the list and dictionaries (arr_data is cleared at the start of the while loop)
 		batchVal[:] = []
