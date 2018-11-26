@@ -93,9 +93,10 @@ while True:
 		final_result = re.split('; |,|\:|\n|\;',temp_result)
 		arr_data.append(final_result[0])
 
-	data_dict['recutc'] = str(int(time.time()))
+	data_dict['recutc'] = int(time.time())
 	data_dict['recdate'] = time.strftime("%x")
 	data_dict['rectime'] = time.strftime("%X")
+	data_dict['devID'] = devID
 
 	# Loop to store the boiler parameters in a dictionary opposite to the parameter names
 	n = 0
