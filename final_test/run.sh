@@ -3,7 +3,7 @@ echo "Do you want to clear the previous data record ? y/n"
 read input
 if [ "$input" = "y" ] || [ "$input" = "Y" ]
 then
-	rm -fr b*
+	rm -fr boiler_data.db boiler_db_data.csv
 	echo "Cleared the files."
 	ls -lr
 	echo "Do you want to execute the script ? y/n"
