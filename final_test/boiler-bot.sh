@@ -1,13 +1,14 @@
 #!/bin/bash
 
+export $(cat ~/test/boiler-config.env | grep -v ^'#' | xargs)
 #Download and save ROOT-CA to /greengrass/certs/
-sudo wget -O /"$dev_id"/certs/root.ca.pem  http://www.symantec.com/content/en/us/enterprise/verisign/roots/VeriSign-Class%203-Public-Primary-Certification-Authority-G5.pem
+sudo mkdir -p /"$dev_id"/certs
+sudo wget -O /"$dev_id"/certs/root.ca.pem http://www.symantec.com/content/en/us/enterprise/verisign/roots/VeriSign-Class%203-Public-Primary-Certification-Authority-G5.pem
 
 # Check if the certs are already downloaded
 count=`ls -1 /"$dev_id"/certs/*.key 2>/dev/null | wc -l`
 
 #Downloading keys into the device
-export $(cat ~/final_test/boiler-config.env | grep -v ^'#' | xargs)
 while [[ "$count" -eq 0 ]]
 do
 	#Downloading the keys
@@ -40,7 +41,7 @@ do
 
 done
 
-unset dev_id deviceid file auth_path bucket s3_bucket s3Key s3_access s3Secret s3_secret resource stringToSign signature
+#unset dev_id deviceid file auth_path bucket s3_bucket s3Key s3_access s3Secret s3_secret resource stringToSign signature
 
 # Start ebusd
 ebus_pid=`/bin/ps -fu root| grep "ebusd" | grep -v "grep" | awk '{print $2}'`
@@ -49,8 +50,12 @@ then
 	sudo /usr/bin/ebusd --scanconfig --lograwdata --receivetimeout=25000
         sleep 2s
 	ebusctl scan 08
+	sleep 2s
 	pidof ebusd
 fi
 
+echo Going live!!
+
 #exec python /home/ubuntu/final_test/final_db_script.py
-/home/ubuntu/final_test/final_db_script.py |& tee -a log
+# /home/ubuntu/final_test/final_db_script.py |& tee -a log
+/home/ubuntu/test/mqtt_live.py |& tee -a batch_live_log
