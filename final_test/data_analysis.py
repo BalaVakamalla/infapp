@@ -12,14 +12,15 @@ import paho.mqtt.client as mqtt
 import json
 import os
 
+devID=os.environ['dev_id']
 MQTT_PORT = 8883
 MQTT_KEEPALIVE_INTERVAL = 45
 
-
 MQTT_HOST = "a1qvp87d3vdcq7.iot.us-west-2.amazonaws.com"
-CA_ROOT_CERT_FILE = "/greengrass/certs/root.ca.pem"
-THING_CERT_FILE = "/greengrass/certs/" + os.environ["dev_id"] + ".cert.pem" 
-THING_PRIVATE_KEY = "/greengrass/certs/" + os.environ["dev_id"] + ".private.key"
+CA_ROOT_CERT_FILE = "/"+ devID +"/certs/root.ca.pem"
+THING_CERT_FILE = "/"+ devID +"/certs/"+ devID +".cert.pem"
+THING_PRIVATE_KEY = "/"+ devID +"/certs/"+ devID +".private.key"
+
 
 # Define on_publish event function
 def on_publish(client, userdata, mid):
