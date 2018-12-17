@@ -63,16 +63,26 @@ cmd_list =     	["flowtemp",
                 "waterpressure",
                 "IonisationVoltageLevel",
                 "fanspeed",
-                "ExternGasvalve",
                 "Statenumber",
                 "ReturnTemp",
                 "PumpHwcFlowSum",
-                "HwcTemp",
-                "HcHours",      ##Diagnostic parameters##
-                "HwcHours",
+                "HwcWaterflow",
+                "HwcTemp",   
+                "PositionValveSet",
+                "HwcTempDesired",
+                "flame",
+                "currenterror",
+                "ACRoomthermostat",
+                "DCRoomthermostat"]
+
+# List of maintanence data from boiler
+m_cmd_list =    ["HwcHours",
+                "HcHours",
                 "CounterStartattempts1",
                 "CounterStartattempts2",
-                "currenterror"]
+                "averageIgnitiontime",
+                "HwcSetPotmeter",
+                "flowtempdesired"]
 
 # Declaring list of datas to be stored and dictionary for indexing
 arr_data = []
@@ -107,10 +117,15 @@ while True:
 			else:
 				data_dict[j] = str('F'+arr_data[n])
 		else:
+                        if arr_data[n] == 'on':
+                            arr_data[n] = 1
+                        if arr_data[n] == 'off':
+                            arr_data[n] = 0
 			data_dict[j] = float(arr_data[n])
 		n = n+1
 
 	batchVal.append(data_dict)
+        print str(data_dict)
 	time.sleep(4)
 	rec_count += 1
 
@@ -132,7 +147,7 @@ while True:
 		data['time'] = time.strftime("%X")
 		data['data'] = batchVal
 		payload = json.dumps(data)
-		client.publish('batch/test', payload, qos=1)	# Send The batched data to topic "batch/test"
+		client.publish('test/batchData', payload, qos=1)	# Send The batched data to topic "batch/test"
 		print("Sending Batch data!!")
 
 		# Clearing the list and dictionaries (arr_data is cleared at the start of the while loop)
@@ -140,4 +155,31 @@ while True:
 		data_dict.clear()
 		data.clear()
 		rec_count = 0
+            #
+            #Maintenance data start
+                arr_data[:] = []
+                for i in m_cmd_list:
+                    cmd_arr = "ebusctl r -m 10 {}".format(i)
+                    args =  shlex.split(cmd_arr)
+                    cmd_output = subprocess.Popen(args,stdout=subprocess.PIPE)
+                    result = cmd_output.communicate()
+                    temp_result = result[0]
+                    final_result = re.split('; |,|\:|\n|\;',temp_result)
+                    arr_data.append(final_result[0])
+                data_dict['utc'] = int(time.time())
+                #data_dict['recdate'] = time.strftime("%x")
+                #data_dict['rectime'] = time.strftime("%X")
+                data_dict['devID'] = devID
+
+                # Loop to store the boiler parameters in a dictionary opposite to the parameter names
+                n = 0
+                for j in m_cmd_list:
+                    data_dict[j] = float(arr_data[n])
+                    n = n+1
+                payload = json.dumps(data_dict)
+                client.publish('test/maintData', payload, qos=1) #send maintanence data
+                print("Maintanance data sent")
+                print str(payload)
+
+
 
