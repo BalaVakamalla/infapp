@@ -1,0 +1,25 @@
+Connection returned result: 0
+Traceback (most recent call last):
+  File "/home/ubuntu/test/mqtt_live.py", line 110, in <module>
+    data_dict[j] = float(arr_data[n])
+ValueError: could not convert string to float: ERR
+./boiler-bot.sh: line 60: /home/ubuntu/test/mqtt_live.py: No such file or directory
+./boiler-bot.sh: line 61: /home/ubuntu/test/mqtt_live.py: No such file or directory
+./boiler-bot.sh: line 61: /home/ubuntu/test/mqtt_live.py: No such file or directory
+./boiler-bot.sh: line 61: /home/ubuntu/test/mqtt_live.py: No such file or directory
+./boiler-bot.sh: line 61: /home/ubuntu/test/mqtt_live.py: No such file or directory
+./boiler-bot.sh: line 61: /home/ubuntu/OT_test/mqtt_live.py: No such file or directory
+Connection returned result: 0
+serialdata
+[]
+Traceback (most recent call last):
+  File "/home/pi/OT_test/mqtt_live.py", line 114, in <module>
+    data_dict[j] = float(arr_data[n])
+ValueError: could not convert string to float: ERR
+Connection returned result: 0
+serialdata
+[]
+Traceback (most recent call last):
+  File "/home/pi/OT_test/mqtt_live.py", line 114, in <module>
+    data_dict[j] = float(arr_data[n])
+ValueError: could not convert string to float: ERR
