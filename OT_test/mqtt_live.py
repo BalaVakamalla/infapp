@@ -70,24 +70,25 @@ client.loop_start()
 time.sleep(2)
 
 # List of commands from boiler
-cmd_list =      ['DHWtemperature',
+cmd_list =      ['configflags',
                 'returntemp',
                 'flowrate',
                 'CHwaterpressure',
-                'Boilerflowtemp',
                 'Relativemodlevel',
-                'Boilerdiagcode',
-                'OEMdiagcode']
+                'appfaultcode',
+                'OEMdiagcode',
+				'oemfault',
+				'DHWtemperature']
 
 ems_json =      {"OEMdiagcode":"op7",
-                "Boilerflowtemp":"op2",
+                "configflags":"op2",
                 "returntemp":"op4",
                 "CHwaterpressure":"op5",
-                "OPFlags":"op1",
+                "configflags":"op1",
                 "Relativemodlevel":"op3",
                 "DHWtemperature":"op10",
                 "flowrate":"op9",
-                "appflags":"op6",
+                "appfaultcode":"op6",
 				"oemfault":"op8"}
 
 # Declaring list of datas to be stored and dictionary for indexing
