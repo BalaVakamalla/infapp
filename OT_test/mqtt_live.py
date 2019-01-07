@@ -114,18 +114,18 @@ while True:
         n = 0
         #for y in response:
         for x in cmd_list:
-			xx = x+"=.*"
-			for i in response:
-				ss=re.search(xx,i,flags=0)
-				if (ss):
-					val=ss.group(0)
+            xx = x+"=.*"
+	    for i in response:
+                ss=re.search(xx,i,flags=0)
+                if (ss):
+                    val=ss.group(0)
                     #print val
                     final_result = re.split('=',val)
                     #print final_result[1]
                     #data_dict['recutc'] = int(time.time())
                     #arr_data[y] = float(final_result[1])
                     data_dict[ems_json[x]] = float(final_result[1])
-				n = n+1
+		n = n+1
 
         #for j,i in enumerate(cmd_list):
             #print data_dict[i
@@ -144,20 +144,20 @@ while True:
         # message with devID same as the devicedID in "'testout/'+devID"
         if send :
                 if (time.time() - clkStart) < 300:
-					live_payload = json.dumps(data_dict)
-					client.publish('test/liveData', live_payload, qos=1)
+                    live_payload = json.dumps(data_dict)
+                    client.publish('test/liveData', live_payload, qos=1)
                     print("Sending live data!!")
                 else:
                     send = False
-                        clkStart = 0
+                    clkStart = 0
         data_dict = {} # Flush dictionary before storing the next set of 4 sec data
 
         # Batch the 4 second data to 5 minute intervals
         if rec_count == 3:
-			data['type']="data"
-        	data['deviceid']=devID
-        	data['bus']="OT1.0"
-        	data['data'] = batchVal
+            data['type']="data"
+            data['deviceid']=devID
+            data['bus']="OT1.0"
+            data['data'] = batchVal
             payload = json.dumps(data)
             client.publish('test/batchData', payload, qos=1)        # Send The batched data to topic "batch/test"
             print("Sending Batch data!!")
