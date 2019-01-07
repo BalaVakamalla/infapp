@@ -8,6 +8,7 @@ import subprocess
 import shlex
 import re
 import os
+import serial
 from datetime import datetime
 from threading import Timer
 
@@ -77,11 +78,11 @@ cmd_list =      ['configflags',
                 'CHwaterpressure',
                 'Relativemodlevel',
                 'appfaultcode',
-                'OEMdiagcode',
-				'oemfault',
-				'DHWtemperature']
+                'OEMdiagcodex',
+		'oemfault',
+		'DHWtemperature']
 
-ems_json =      {"OEMdiagcode":"op7",
+ems_json =      {"OEMdiagcodex":"op7",
                 "configflags":"op2",
                 "returntemp":"op4",
                 "CHwaterpressure":"op5",
@@ -90,7 +91,7 @@ ems_json =      {"OEMdiagcode":"op7",
                 "DHWtemperature":"op10",
                 "flowrate":"op9",
                 "appfaultcode":"op6",
-				"oemfault":"op8"}
+		"oemfault":"op8"}
 
 # Declaring list of datas to be stored and dictionary for indexing
 arr_data = [len(cmd_list)] * 0
@@ -104,7 +105,7 @@ n = 0
 while True:
 
         if (ser.isOpen == False):
-			ser.open()
+            ser.open()
         response = serialport.readlines()
         print "serialdata"
         #response = str(response)
@@ -115,7 +116,8 @@ while True:
         #for y in response:
         for x in cmd_list:
             xx = x+"=.*"
-	    for i in response:
+	    data_dict[ems_json[x]] = -32767
+            for i in response:
                 ss=re.search(xx,i,flags=0)
                 if (ss):
                     val=ss.group(0)
@@ -125,6 +127,7 @@ while True:
                     #data_dict['recutc'] = int(time.time())
                     #arr_data[y] = float(final_result[1])
                     data_dict[ems_json[x]] = float(final_result[1])
+
 		n = n+1
 
         #for j,i in enumerate(cmd_list):
