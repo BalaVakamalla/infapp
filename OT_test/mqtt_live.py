@@ -69,6 +69,7 @@ client.subscribe('testin/'+devID , 1 )
 client.loop_start()
 time.sleep(2)
 
+ser = serialport = serial.Serial("/dev/ttyACM0", 9600, timeout=1)
 # List of commands from boiler
 cmd_list =      ['configflags',
                 'returntemp',
