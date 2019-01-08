@@ -75,22 +75,22 @@ ser = serialport = serial.Serial("/dev/ttyACM0", 9600, timeout=1)
 cmd_list =      ['errorcode',
                 'statuscode',
                 'Flowtemp',
-                'returntemp',
+                'outsideTemp',
                 'Flamecurrent',
                 'systempressure',
-                'flags',
-		'burnerpower',
+                'statucode2',
+		'Burnerstarts',
 		'dhwtemp',
                 'flowrate']
 
 ems_json =      {"errorcode":"em1",
                 "statuscode":"em2",
-                "returntemp":"em5",
+                "outsideTemp":"em5",
                 "systempressure":"em7",
                 "Flowtemp":"em4",
                 "Flamecurrent":"em6",
-                "flags":"em8",
-                "burnerpower":"em9",
+                "statucode2":"em8",
+                "Burnerstarts":"em9",
                 "dhwtemp":"em10",
 		"flowrate":"em11"}
 
