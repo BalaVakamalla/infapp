@@ -80,10 +80,11 @@ cmd_list =      ['configflags',
                 'appfaultcode',
                 'OEMdiagcodex',
 		'oemfault',
-		'DHWtemperature']
+		'DHWtemperature',
+                'flowtemp']
 
 ems_json =      {"OEMdiagcodex":"op7",
-                "configflags":"op2",
+                "flowtemp":"op2",
                 "returntemp":"op4",
                 "CHwaterpressure":"op5",
                 "configflags":"op1",
@@ -116,7 +117,7 @@ while True:
         #for y in response:
         for x in cmd_list:
             xx = x+"=.*"
-	    data_dict[ems_json[x]] = -32767
+	    data_dict[ems_json[x]] = "er1" 
             for i in response:
                 ss=re.search(xx,i,flags=0)
                 if (ss):
@@ -126,7 +127,7 @@ while True:
                     #print final_result[1]
                     #data_dict['recutc'] = int(time.time())
                     #arr_data[y] = float(final_result[1])
-                    data_dict[ems_json[x]] = float(final_result[1])
+                    data_dict[ems_json[x]] = str(final_result[1])
 
 		n = n+1
 
@@ -137,7 +138,7 @@ while True:
             #print i
 
         #batchVal.append(data_dict)
-        data_dict['timestamp'] = int(time.time())
+        data_dict['timestamp'] = str(int(time.time()))
         print data_dict
         time.sleep(4)
         rec_count += 1
