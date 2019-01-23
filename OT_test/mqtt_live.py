@@ -23,11 +23,15 @@ secs=3
 devID=os.environ['dev_id']
 send=False
 live=0
+fault=0
+prvfault=0
 
 MQTT_PORT = 8883
 MQTT_KEEPALIVE_INTERVAL = 45
+BATCH_TOTAL=66
+FREQ=5
 
-MQTT_HOST = "a1qvp87d3vdcq7.iot.us-west-2.amazonaws.com"
+MQTT_HOST = "a1qvp87d3vdcq7-ats.iot.us-west-2.amazonaws.com"
 CA_ROOT_CERT_FILE = "/"+ devID +"/certs/root.ca.pem"
 THING_CERT_FILE = "/"+ devID +"/certs/"+ devID +".cert.pem"
 THING_PRIVATE_KEY = "/"+ devID +"/certs/"+ devID +".private.key"
@@ -117,7 +121,7 @@ while True:
         #for y in response:
         for x in cmd_list:
             xx = x+"=.*"
-	    data_dict[ems_json[x]] = "er1" 
+	    data_dict[ems_json[x]] = "er1"
             for i in response:
                 ss=re.search(xx,i,flags=0)
                 if (ss):
