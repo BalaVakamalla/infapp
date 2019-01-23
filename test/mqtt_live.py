@@ -23,10 +23,15 @@ devID=os.environ['dev_id']
 send=False
 live=0
 
+print devID
+
 MQTT_PORT = 8883
 MQTT_KEEPALIVE_INTERVAL = 45
 
-MQTT_HOST = "a1qvp87d3vdcq7.iot.us-west-2.amazonaws.com"
+BATCH_TOTAL = 66 
+FREQ = 5
+
+MQTT_HOST = "a1qvp87d3vdcq7-ats.iot.us-west-2.amazonaws.com"
 CA_ROOT_CERT_FILE = "/"+ devID +"/certs/root.ca.pem"
 THING_CERT_FILE = "/"+ devID +"/certs/"+ devID +".cert.pem"
 THING_PRIVATE_KEY = "/"+ devID +"/certs/"+ devID +".private.key"
@@ -65,7 +70,7 @@ client.tls_set(CA_ROOT_CERT_FILE, certfile=THING_CERT_FILE, keyfile=THING_PRIVAT
 
 # Connect with MQTT Broker
 client.connect(MQTT_HOST, MQTT_PORT, MQTT_KEEPALIVE_INTERVAL)
-client.subscribe('testin/'+devID , 1 )
+client.subscribe('test/6ae5e40d548964a57fffd2a7c651b94bd20b4c31b5b063b9ed5806cc1d28a2ec', 1 )
 client.loop_start()
 time.sleep(2)
 
@@ -93,7 +98,7 @@ cmd_list =     	["flowtemp",
                 "ReturnTemp",
                 "PumpHwcFlowSum",
                 "HwcWaterflow",
-                "HwcTemp",
+                "HwcTemp",   
                 "PositionValveSet",
                 "HwcTempDesired",
                 "flame",
@@ -115,11 +120,15 @@ arr_data = []
 data_dict = {}
 batchVal = []	# List containing all 4 second data
 data = {}		# Store data for the JSON payload
+liveVal = []
+prvBatchVal = []
+
+
 
 def maint_data():
     arr_data[:] = []
     data_dict.clear()
-    data_dict['recutc'] = int(time.time())
+    data_dict['timestamp'] = str(int(time.time()))
     data_dict['type']="maint"
     data_dict['deviceid']=devID
     data_dict['bus']="ebus2.1"
@@ -140,14 +149,17 @@ def maint_data():
         if arr_data[n] == '-':
             arr_data[n] = str(0)
         if arr_data[n] == 'ERR':
-            arr_data[n] = -1
-        data_dict[j[1]] = float(arr_data[n])
+            arr_data[n] = 'fr'
+        data_dict[j[1]] = str(arr_data[n])
         n = n+1
     payload = json.dumps(data_dict)
     client.publish('test/maintData', payload, qos=1) #send maintanence data
     print("Maintanance data sent")
     print str(payload)
     data_dict.clear()
+
+t = Timer(86400, maint_data)
+t.start()
 
 rec_count = 0
 while True:
@@ -159,10 +171,10 @@ while True:
 		result = cmd_output.communicate()
 		temp_result = result[0]
 		final_result = re.split('; |,|\:|\n|\;',temp_result)
-		arr_data.append(final_result[0])
+		arr_data.extend(final_result[0])
 
-	#data_dict['timestamp'] = int(time.time())
-	data_dict['recutc'] = int(time.time())
+	data_dict['timestamp'] = str(int(time.time()))
+	#data_dict['recutc'] = int(time.time())
         #data_dict['recdate'] = time.strftime("%x")
 	#data_dict['rectime'] = time.strftime("%X")
         #data_dict['devID'] = devID
@@ -172,7 +184,7 @@ while True:
 	for j in spec_list:
 		if j[0] == "currenterror":
 			if  arr_data[n] == '-':
-				data_dict[j[1]] = int(0)
+				data_dict[j[1]] = str(0)
                                 live = 0
 			else:
 				data_dict[j[1]] = str(arr_data[n])
@@ -183,15 +195,15 @@ while True:
                         if arr_data[n] == 'off' or arr_data[n] == 'no':
                             arr_data[n] = 0
                         if arr_data[n] == '-':
-                            arr_data[n]=0
+                            arr_data[n]='na'
 		        if arr_data[n] == 'ERR':
-                            arr_data[n] = -1
-                        data_dict[j[1]] = float(arr_data[n])
+                            arr_data[n] = 'fr' 
+                        data_dict[j[1]] = str(arr_data[n])
 		n = n+1
 
-	batchVal.append(data_dict)
+	batchVal.extend(data_dict)
         print str(data_dict)
-	time.sleep(4)
+	time.sleep(FREQ)
 	rec_count += 1
 
 	# Send live data into "'testout/'+devID" on demand triggered on
@@ -203,35 +215,60 @@ while True:
                         data['bus']="ebus2.1"
 			data['data'] = data_dict
                         live_payload = json.dumps(data)
-			client.publish('test/batchlive', live_payload, qos=1)
+			client.publish('test/liveData', live_payload, qos=1)
 			print("Sending live data!!")
 		else:
 			send = False
 			clkStart = 0
 	data_dict = {} # Flush dictionary before storing the next set of 4 sec data
 
-	# Batch the 4 second data to 5 minute intervals
-	if rec_count == 3 or live == 1:
+	# Batch the 4 second data to 5 .5 minute intervals, change to 75 + 7 = 82
+        # batch data for 5 seconds at 5 .5 mins is 66
+	if rec_count == BATCH_TOTAL :
                 data.clear()
 		#data['date'] = time.strftime("%x")
 		#data['time'] = time.strftime("%X")
 		data['type']="data"
-        data['deviceid']=devID
-        data['bus']="ebus2.1"
-        data['data'] = batchVal
+                data['deviceid']=devID
+                data['bus']="ebus2.1"
+                data['data'] = batchVal
 		payload = json.dumps(data)
 		client.publish('test/batchData', payload, qos=1)	# Send The batched data to topic "batch/test"
 		print("Sending Batch data!!")
-
+                
+                prvBatchVal = batchVal
 		# Clearing the list and dictionaries (arr_data is cleared at the start of the while loop)
 		batchVal[:] = []
 		data_dict.clear()
 		data.clear()
 		rec_count = 0
-                maint_data()
+                #maint_data()
+                live = 1
 
-            #Maintenance data start
+        if live == 1:
+            p = 0
+            l = 0
+            data.clear()
+            data['type']="data"
+            data['deviceid']=devID
+            data['bus']="ebus2.1"
+            prevcnt = BATCH_TOTAL - rec_count
+            print ("prevcnt=" + str(prevcnt))
+            while (p < prevcnt):
+                    print ("p=" + str (p))
+                    liveVal.extend(prvBatchVal[prevcnt+p])
+                    p = p+1
+                    
+            while (l < rec_count):
+                    liveVal.extend(batchVal[l])
+                    l = l+1
+                    
+            data['data'] = liveVal
+            payload = json.dumps(data)
+            client.publish('test/liveData', payload, qos=1)
+            print ("Sent live Data !!")
+            print payload
+            liveVal[:] = []
 
 
-#t = Timer(secs, maint_data)
-#t.start()
+
