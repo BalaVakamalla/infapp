@@ -22,12 +22,14 @@ secs=3
 
 devID=os.environ['dev_id']
 send=False
-live=0
+fault=0
 
 MQTT_PORT = 8883
 MQTT_KEEPALIVE_INTERVAL = 45
+BATCH_TOTAL=66
+FREQ=5
 
-MQTT_HOST = "a1qvp87d3vdcq7.iot.us-west-2.amazonaws.com"
+MQTT_HOST = "a1qvp87d3vdcq7-ats.iot.us-west-2.amazonaws.com"
 CA_ROOT_CERT_FILE = "/"+ devID +"/certs/root.ca.pem"
 THING_CERT_FILE = "/"+ devID +"/certs/"+ devID +".cert.pem"
 THING_PRIVATE_KEY = "/"+ devID +"/certs/"+ devID +".private.key"
@@ -66,36 +68,44 @@ client.tls_set(CA_ROOT_CERT_FILE, certfile=THING_CERT_FILE, keyfile=THING_PRIVAT
 
 # Connect with MQTT Broker
 client.connect(MQTT_HOST, MQTT_PORT, MQTT_KEEPALIVE_INTERVAL)
-client.subscribe('testin/'+devID , 1 )
+client.subscribe('test/d194568452418e3bc1de5b0f913def8b100586068eb84a4a8a10ec2e3b430e98', 1 )
 client.loop_start()
 time.sleep(2)
 
 ser = serialport = serial.Serial("/dev/ttyACM0", 9600, timeout=1)
 # List of commands from boiler
-cmd_list =      ['errorcode',
+cmd_list =      ['errorcode1',
                 'statuscode',
                 'Flowtemp',
                 'outsideTemp',
                 'Flamecurrent',
                 'systempressure',
-                'statucode2',
-                'statucode1',
-		'Burnerstarts',
-		'dhwtemp',
-                'flowrate',
+                'errorcode2',
+		'returntemp',
+                'dhwflowrate',
+                'curburnerpow',
+                'dhwtemp',
+                'selflowtemp',
+                'selburnerpow',
+                'curboilerperfm'
                 ]
 
-ems_json =      {"errorcode":"em1",
-                "statuscode":"em2",
-                "statucode1":"em3",
+ems_json =      {"errorcode1":"em2",
+                "statuscode":"em1",
+                "errorcode2":"em3",
                 "outsideTemp":"em5",
                 "systempressure":"em7",
                 "Flowtemp":"em4",
                 "Flamecurrent":"em6",
-                "statucode2":"em8",
-                "Burnerstarts":"em9",
+                "emsflags":"em8",
+                "curburnerpow":"em9",
                 "dhwtemp":"em10",
-		"flowrate":"em11"}
+                "returntemp":"em5",
+		"dhwflowrate":"em14",
+                "selflowtemp":"em12",
+                "selburnerpow":"em13",
+                "curboilerperfm":"em15"
+                }
 
 # Declaring list of datas to be stored and dictionary for indexing
 arr_data = [len(cmd_list)] * 0
@@ -120,7 +130,7 @@ while True:
         #for y in response:
         for x in cmd_list:
             xx = x+":.*"
-	    data_dict[ems_json[x]] = "er1"
+	    data_dict[ems_json[x]] = "fr"
             for i in response:
                 ss=re.search(xx,i,flags=0)
                 if (ss):
@@ -130,6 +140,13 @@ while True:
                     #print final_result[1]
                     #data_dict['recutc'] = int(time.time())
                     #arr_data[y] = float(final_result[1])
+                    if (final_result[1]) == ' NO PRESSURE SENSOR':
+                        final_result[1] = "fr"
+                    if ((final_result[0] == 'errorcode1' or final_result[0] == 'errorcode2') and final_result[1] > 0):
+                        fault = fault+1
+                    else:
+                        fault = 0
+
                     data_dict[ems_json[x]] = (final_result[1])
 
 		n = n+1
@@ -141,9 +158,9 @@ while True:
             #print i
 
         #batchVal.append(data_dict)
-        data_dict['timestamp'] = int(time.time())
+        data_dict['timestamp'] = str(int(time.time()))
         print data_dict
-        time.sleep(4)
+        time.sleep(FREQ)
         rec_count += 1
         batchVal.append(data_dict)
 
@@ -160,10 +177,10 @@ while True:
         data_dict = {} # Flush dictionary before storing the next set of 4 sec data
 
         # Batch the 4 second data to 5 minute intervals
-        if rec_count == 3:
+        if rec_count == BATCH_TOTAL:
             data['type']="data"
             data['deviceid']=devID
-            data['bus']="ems1.0"
+            data['bus']="ems2.4"
             data['data'] = batchVal
             payload = json.dumps(data)
             client.publish('test/batchData', payload, qos=1)        # Send The batched data to topic "batch/test"
@@ -173,3 +190,14 @@ while True:
             data_dict.clear()
             data.clear()
             rec_count = 0
+
+        if fault == 1:
+            data.clear()
+            data['type']="data"
+            data['deviceid']=devID
+            data['bus']="ems2.4"
+            data['data'] = batchVal
+            payload = json.dumps(data)
+            client.publish('test/faultData', payload, qos=1)
+            print ("Sent fault Data !!")
+            print payload
