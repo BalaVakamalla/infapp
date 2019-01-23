@@ -8,6 +8,7 @@ import subprocess
 import shlex
 import re
 import os
+import copy
 from datetime import datetime
 from threading import Timer
 
@@ -21,7 +22,7 @@ secs=3
 
 devID=os.environ['dev_id']
 send=False
-live=0
+fault=0
 
 print devID
 
@@ -171,7 +172,7 @@ while True:
 		result = cmd_output.communicate()
 		temp_result = result[0]
 		final_result = re.split('; |,|\:|\n|\;',temp_result)
-		arr_data.extend(final_result[0])
+		arr_data.append(final_result[0])
 
 	data_dict['timestamp'] = str(int(time.time()))
 	#data_dict['recutc'] = int(time.time())
@@ -185,10 +186,10 @@ while True:
 		if j[0] == "currenterror":
 			if  arr_data[n] == '-':
 				data_dict[j[1]] = str(0)
-                                live = 0
+                                fault = 0
 			else:
 				data_dict[j[1]] = str(arr_data[n])
-                                live = live+1
+                                fault = fault+1
 		else:
                         if arr_data[n] == 'on' or arr_data[n] == 'yes':
                             arr_data[n] = 1
@@ -201,9 +202,9 @@ while True:
                         data_dict[j[1]] = str(arr_data[n])
 		n = n+1
 
-	batchVal.extend(data_dict)
+	batchVal.append(data_dict)
         print str(data_dict)
-	time.sleep(FREQ)
+        time.sleep(FREQ)
 	rec_count += 1
 
 	# Send live data into "'testout/'+devID" on demand triggered on
@@ -235,38 +236,36 @@ while True:
 		payload = json.dumps(data)
 		client.publish('test/batchData', payload, qos=1)	# Send The batched data to topic "batch/test"
 		print("Sending Batch data!!")
-                
-                prvBatchVal = batchVal
-		# Clearing the list and dictionaries (arr_data is cleared at the start of the while loop)
+                print payload 
+                # Clearing the list and dictionaries (arr_data is cleared at the start of the while loop)
 		batchVal[:] = []
 		data_dict.clear()
 		data.clear()
 		rec_count = 0
                 #maint_data()
-                live = 1
 
-        if live == 1:
-            p = 0
-            l = 0
+        if fault == 1:
             data.clear()
-            data['type']="data"
+            data['type']="faultData"
             data['deviceid']=devID
             data['bus']="ebus2.1"
-            prevcnt = BATCH_TOTAL - rec_count
-            print ("prevcnt=" + str(prevcnt))
-            while (p < prevcnt):
-                    print ("p=" + str (p))
-                    liveVal.extend(prvBatchVal[prevcnt+p])
-                    p = p+1
+            #prevcnt = BATCH_TOTAL - rec_count
+            #print ("prevcnt=" + str(prevcnt))
+            #print prvBatchVal
+            #print "end"
+            #while (p < prevcnt):
+            #        print ("p=" + str (p))
+            #        liveVal.extend(prvBatchVal[(prevcnt-1)+p])
+            #        p = p+1
                     
-            while (l < rec_count):
-                    liveVal.extend(batchVal[l])
-                    l = l+1
+           # while (l < rec_count):
+           #         liveVal.extend(batchVal[l])
+           #         l = l+1
                     
-            data['data'] = liveVal
+            data['data'] = batchVal
             payload = json.dumps(data)
-            client.publish('test/liveData', payload, qos=1)
-            print ("Sent live Data !!")
+            client.publish('test/faultData', payload, qos=1)
+            print ("Sent fault Data !!")
             print payload
             liveVal[:] = []
 
