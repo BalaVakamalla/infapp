@@ -23,6 +23,7 @@ secs=3
 devID=os.environ['dev_id']
 send=False
 fault=0
+prvfault=0
 
 MQTT_PORT = 8883
 MQTT_KEEPALIVE_INTERVAL = 45
@@ -140,13 +141,9 @@ while True:
                     #print final_result[1]
                     #data_dict['recutc'] = int(time.time())
                     #arr_data[y] = float(final_result[1])
-                    if (final_result[1]) == ' NO PRESSURE SENSOR':
-                        final_result[1] = "fr"
-                    if ((final_result[0] == 'errorcode1' or final_result[0] == 'errorcode2') and final_result[1] > 0):
-                        fault = fault+1
-                    else:
-                        fault = 0
-
+                    if ((final_result[0] == "errorcode1" or final_result[0] == "errorcode2") and final_result[1] > 0):
+                        if (final_result[1] != fault):
+                            fault = final_result[1]
                     data_dict[ems_json[x]] = (final_result[1])
 
 		n = n+1
@@ -168,7 +165,11 @@ while True:
         # message with devID same as the devicedID in "'testout/'+devID"
         if send :
                 if (time.time() - clkStart) < 300:
-                    live_payload = json.dumps(data_dict)
+                    data['type']="dataLive"
+                    data['deviceid']=devID
+                    data['bus']="ems2.4"
+                    data['data']=data_dict
+                    live_payload = json.dumps(data)
                     client.publish('test/liveData', live_payload, qos=1)
                     print("Sending live data!!")
                 else:
@@ -191,9 +192,9 @@ while True:
             data.clear()
             rec_count = 0
 
-        if fault == 1:
+        if fault != prvfault:
             data.clear()
-            data['type']="data"
+            data['type']="faultData"
             data['deviceid']=devID
             data['bus']="ems2.4"
             data['data'] = batchVal
@@ -201,3 +202,4 @@ while True:
             client.publish('test/faultData', payload, qos=1)
             print ("Sent fault Data !!")
             print payload
+            prvfault = fault

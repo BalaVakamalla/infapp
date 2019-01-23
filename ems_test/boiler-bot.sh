@@ -3,12 +3,13 @@
 export $(cat /home/pi/boiler-bot/ems_test/boiler-config.env | grep -v ^'#' | xargs)
 #Download and save ROOT-CA to /greengrass/certs/
 sudo mkdir -p /"$dev_id"/certs
-sudo wget -O /"$dev_id"/certs/root.ca.pem http://www.symantec.com/content/en/us/enterprise/verisign/roots/VeriSign-Class%203-Public-Primary-Certification-Authority-G5.pem
+#sudo wget -O /"$dev_id"/certs/root.ca.pem http://www.symantec.com/content/en/us/enterprise/verisign/roots/VeriSign-Class%203-Public-Primary-Certification-Authority-G5.pem
 
 # Check if the certs are already downloaded
+
 count=`ls -1 /"$dev_id"/certs/*.key 2>/dev/null | wc -l`
 
-#Downloading keys into the device
+
 while [[ "$count" -eq 0 ]]
 do
 	#Downloading the keys
