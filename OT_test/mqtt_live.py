@@ -78,12 +78,12 @@ cmd_list =      ['configflags',
                 'CHwaterpressure',
                 'Relativemodlevel',
                 'appfaultcode',
-                'OEMdiagcodex',
+                'OEMdiagcode',
 		'oemfault',
 		'DHWtemperature',
                 'flowtemp']
 
-ems_json =      {"OEMdiagcodex":"op7",
+ems_json =      {"OEMdiagcode":"op7",
                 "flowtemp":"op2",
                 "returntemp":"op4",
                 "CHwaterpressure":"op5",
@@ -117,7 +117,7 @@ while True:
         #for y in response:
         for x in cmd_list:
             xx = x+"=.*"
-	    data_dict[ems_json[x]] = "er1" 
+	    data_dict[ems_json[x]] = "fr" 
             for i in response:
                 ss=re.search(xx,i,flags=0)
                 if (ss):
@@ -157,10 +157,10 @@ while True:
         data_dict = {} # Flush dictionary before storing the next set of 4 sec data
 
         # Batch the 4 second data to 5 minute intervals
-        if rec_count == 3:
+        if rec_count == 75:
             data['type']="data"
             data['deviceid']=devID
-            data['bus']="OT1.0"
+            data['bus']="OT2.4"
             data['data'] = batchVal
             payload = json.dumps(data)
             client.publish('test/batchData', payload, qos=1)        # Send The batched data to topic "batch/test"
