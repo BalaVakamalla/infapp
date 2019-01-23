@@ -79,12 +79,15 @@ cmd_list =      ['errorcode',
                 'Flamecurrent',
                 'systempressure',
                 'statucode2',
+                'statucode1',
 		'Burnerstarts',
 		'dhwtemp',
-                'flowrate']
+                'flowrate',
+                ]
 
 ems_json =      {"errorcode":"em1",
                 "statuscode":"em2",
+                "statucode1":"em3",
                 "outsideTemp":"em5",
                 "systempressure":"em7",
                 "Flowtemp":"em4",
@@ -117,7 +120,7 @@ while True:
         #for y in response:
         for x in cmd_list:
             xx = x+":.*"
-	    data_dict[ems_json[x]] = -32767
+	    data_dict[ems_json[x]] = "er1"
             for i in response:
                 ss=re.search(xx,i,flags=0)
                 if (ss):

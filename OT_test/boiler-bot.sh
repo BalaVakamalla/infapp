@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export $(cat ~/OT_test/boiler-config.env | grep -v ^'#' | xargs)
+export $(cat /home/pi/boiler-bot/OT_test/boiler-config.env | grep -v ^'#' | xargs)
 #Download and save ROOT-CA to /greengrass/certs/
 sudo mkdir -p /"$dev_id"/certs
 sudo wget -O /"$dev_id"/certs/root.ca.pem http://www.symantec.com/content/en/us/enterprise/verisign/roots/VeriSign-Class%203-Public-Primary-Certification-Authority-G5.pem
@@ -58,5 +58,5 @@ fi
 echo going live
 #exec python /home/ubuntu/final_test/final_db_script.py
 # /home/ubuntu/final_test/final_db_script.py |& tee -a log
-~/OT_test/mqtt_live.py |& tee -a batch_live_log
+/home/pi/boiler-bot/OT_test/mqtt_live.py |& tee -a /home/pi/boiler-bot/OT_test/batch_live_log
 
