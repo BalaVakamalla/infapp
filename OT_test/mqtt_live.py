@@ -130,7 +130,7 @@ while True:
                     #print final_result[1]
                     #data_dict['recutc'] = int(time.time())
                     #arr_data[y] = float(final_result[1])
-					if ((final_result[0] == "OEMdiagcode") and final_result[1] > 0):
+		    if ((final_result[0] == "OEMdiagcode") and final_result[1] > 0):
                         if (final_result[1] != fault):
                             fault = final_result[1]
                     data_dict[ot_json[x]] = str(final_result[1])
@@ -183,12 +183,12 @@ while True:
 
         if fault != prvfault:
             data.clear()
-		    data['type']="faultData"
-		    data['deviceid']=devID
-		    data['bus']="OT2.4"
-		    data['data'] = batchVal
-		    payload = json.dumps(data)
-		    client.publish('test/faultData', payload, qos=1)
-		    print ("Sent fault Data !!")
-		    print payload
-		    prvfault = fault
+	    data['type']="faultData"
+	    data['deviceid']=devID
+	    data['bus']="OT2.4"
+	    data['data'] = batchVal
+	    payload = json.dumps(data)
+	    client.publish('test/faultData', payload, qos=1)
+	    print ("Sent fault Data !!")
+	    print payload
+	    prvfault = fault
