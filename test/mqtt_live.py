@@ -31,6 +31,7 @@ MQTT_KEEPALIVE_INTERVAL = 45
 
 BATCH_TOTAL = 66 
 FREQ = 5
+BUSTYPE = "EBUS2.1"
 
 MQTT_HOST = "a1qvp87d3vdcq7-ats.iot.us-west-2.amazonaws.com"
 CA_ROOT_CERT_FILE = "/"+ devID +"/certs/root.ca.pem"
@@ -132,7 +133,7 @@ def maint_data():
     data_dict['timestamp'] = str(int(time.time()))
     data_dict['type']="maint"
     data_dict['deviceid']=devID
-    data_dict['bus']="ebus2.1"
+    data_dict['bus']=BUSTYPE
     for i in m_cmd_list:
         cmd_arr = "ebusctl r -m 10 {}".format(i[0])
         args =  shlex.split(cmd_arr)
@@ -213,7 +214,7 @@ while True:
 		if (time.time() - clkStart) < 300:
                         data['type']="dataLive"
                         data['deviceid']=devID
-                        data['bus']="ebus2.1"
+                        data['bus']=BUSTYPE
 			data['data'] = data_dict
                         live_payload = json.dumps(data)
 			client.publish('test/liveData', live_payload, qos=1)
@@ -231,7 +232,7 @@ while True:
 		#data['time'] = time.strftime("%X")
 		data['type']="data"
                 data['deviceid']=devID
-                data['bus']="ebus2.1"
+                data['bus']=BUSTYPE
                 data['data'] = batchVal
 		payload = json.dumps(data)
 		client.publish('test/batchData', payload, qos=1)	# Send The batched data to topic "batch/test"
@@ -248,7 +249,7 @@ while True:
             data.clear()
             data['type']="faultData"
             data['deviceid']=devID
-            data['bus']="ebus2.1"
+            data['bus']=BUSTYPE
             #prevcnt = BATCH_TOTAL - rec_count
             #print ("prevcnt=" + str(prevcnt))
             #print prvBatchVal
