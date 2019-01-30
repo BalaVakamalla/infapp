@@ -3,7 +3,7 @@
 export $(cat /home/pi/boiler-bot/OT_test/boiler-config.env | grep -v ^'#' | xargs)
 #Download and save ROOT-CA to /greengrass/certs/
 sudo mkdir -p /"$dev_id"/certs
-sudo wget -O /"$dev_id"/certs/root.ca.pem http://www.symantec.com/content/en/us/enterprise/verisign/roots/VeriSign-Class%203-Public-Primary-Certification-Authority-G5.pem
+#sudo wget -O /"$dev_id"/certs/root.ca.pem http://www.symantec.com/content/en/us/enterprise/verisign/roots/VeriSign-Class%203-Public-Primary-Certification-Authority-G5.pem
 
 # Check if the certs are already downloaded
 count=`ls -1 /"$dev_id"/certs/*.key 2>/dev/null | wc -l`
@@ -52,11 +52,10 @@ then
 	sudo /usr/bin/ebusd --scanconfig --lograwdata --receivetimeout=25000
         sleep 2s
 	ebusctl scan 08
-        echo ebusd started with pid =	
+        echo ebusd started with pid =
         pidof ebusd
 fi
 echo going live
 #exec python /home/ubuntu/final_test/final_db_script.py
 # /home/ubuntu/final_test/final_db_script.py |& tee -a log
 /home/pi/boiler-bot/OT_test/mqtt_live.py |& tee -a /home/pi/boiler-bot/OT_test/batch_live_log
-

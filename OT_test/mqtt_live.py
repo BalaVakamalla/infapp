@@ -22,12 +22,15 @@ secs=3
 
 devID=os.environ['dev_id']
 send=False
-live=0
+fault=0
+prvfault=0
 
 MQTT_PORT = 8883
 MQTT_KEEPALIVE_INTERVAL = 45
+BATCH_TOTAL=66
+FREQ=5
 
-MQTT_HOST = "a1qvp87d3vdcq7.iot.us-west-2.amazonaws.com"
+MQTT_HOST = "a1qvp87d3vdcq7-ats.iot.us-west-2.amazonaws.com"
 CA_ROOT_CERT_FILE = "/"+ devID +"/certs/root.ca.pem"
 THING_CERT_FILE = "/"+ devID +"/certs/"+ devID +".cert.pem"
 THING_PRIVATE_KEY = "/"+ devID +"/certs/"+ devID +".private.key"
@@ -66,7 +69,7 @@ client.tls_set(CA_ROOT_CERT_FILE, certfile=THING_CERT_FILE, keyfile=THING_PRIVAT
 
 # Connect with MQTT Broker
 client.connect(MQTT_HOST, MQTT_PORT, MQTT_KEEPALIVE_INTERVAL)
-client.subscribe('testin/'+devID , 1 )
+client.subscribe('test/0e8701fae51bf41da1e413ce577217b675fa1de9e9b711b38407f12c1c692765', 1 )
 client.loop_start()
 time.sleep(2)
 
@@ -78,12 +81,12 @@ cmd_list =      ['configflags',
                 'CHwaterpressure',
                 'Relativemodlevel',
                 'appfaultcode',
-                'OEMdiagcodex',
+                'OEMdiagcode',
 		'oemfault',
 		'DHWtemperature',
                 'flowtemp']
 
-ems_json =      {"OEMdiagcodex":"op7",
+ot_json =      {"OEMdiagcode":"op7",
                 "flowtemp":"op2",
                 "returntemp":"op4",
                 "CHwaterpressure":"op5",
@@ -117,7 +120,7 @@ while True:
         #for y in response:
         for x in cmd_list:
             xx = x+"=.*"
-	    data_dict[ems_json[x]] = "er1" 
+	    data_dict[ot_json[x]] = "fr"
             for i in response:
                 ss=re.search(xx,i,flags=0)
                 if (ss):
@@ -127,7 +130,10 @@ while True:
                     #print final_result[1]
                     #data_dict['recutc'] = int(time.time())
                     #arr_data[y] = float(final_result[1])
-                    data_dict[ems_json[x]] = str(final_result[1])
+		    if ((final_result[0] == "OEMdiagcode") and final_result[1] > 0):
+                        if (final_result[1] != fault):
+                            fault = final_result[1]
+                    data_dict[ot_json[x]] = str(final_result[1])
 
 		n = n+1
 
@@ -148,7 +154,11 @@ while True:
         # message with devID same as the devicedID in "'testout/'+devID"
         if send :
                 if (time.time() - clkStart) < 300:
-                    live_payload = json.dumps(data_dict)
+                    data['type']="dataLive"
+                    data['deviceid']=devID
+                    data['bus']="OT2.4"
+                    data['data']=data_dict
+                    live_payload = json.dumps(data)
                     client.publish('test/liveData', live_payload, qos=1)
                     print("Sending live data!!")
                 else:
@@ -157,10 +167,10 @@ while True:
         data_dict = {} # Flush dictionary before storing the next set of 4 sec data
 
         # Batch the 4 second data to 5 minute intervals
-        if rec_count == 3:
+        if rec_count == BATCH_TOTAL:
             data['type']="data"
             data['deviceid']=devID
-            data['bus']="OT1.0"
+            data['bus']="OT2.4"
             data['data'] = batchVal
             payload = json.dumps(data)
             client.publish('test/batchData', payload, qos=1)        # Send The batched data to topic "batch/test"
@@ -170,3 +180,15 @@ while True:
             data_dict.clear()
             data.clear()
             rec_count = 0
+
+        if fault != prvfault:
+            data.clear()
+	    data['type']="faultData"
+	    data['deviceid']=devID
+	    data['bus']="OT2.4"
+	    data['data'] = batchVal
+	    payload = json.dumps(data)
+	    client.publish('test/faultData', payload, qos=1)
+	    print ("Sent fault Data !!")
+	    print payload
+	    prvfault = fault
