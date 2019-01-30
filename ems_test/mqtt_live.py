@@ -29,6 +29,7 @@ MQTT_PORT = 8883
 MQTT_KEEPALIVE_INTERVAL = 45
 BATCH_TOTAL=66
 FREQ=5
+BUSTYPE="EMS1.0"
 
 MQTT_HOST = "a1qvp87d3vdcq7-ats.iot.us-west-2.amazonaws.com"
 CA_ROOT_CERT_FILE = "/"+ devID +"/certs/root.ca.pem"
@@ -116,29 +117,30 @@ data = {}       # Store data for the JSON payload
 
 # Loop to get the boiler parameters and temporarily store in a list before storing in a dictionary
 rec_count = 0
-n = 0
+curtime = int (time.time())
+nexttime = curtime + FREQ 
+for x in cmd_list:
+    data_dict[ems_json[x]] = "fr"
 while True:
 
         if (ser.isOpen == False):
             ser.open()
         response = serialport.readlines()
-        print "serialdata"
         #response = str(response)
         response = [i.replace("\r\n","") for i in response]
         print response
 
-        n = 0
         #for y in response:
         for x in cmd_list:
             xx = x+":.*"
-	    data_dict[ems_json[x]] = "fr"
+            #data_dict[ems_json[x]] = "fr"
             for i in response:
                 ss=re.search(xx,i,flags=0)
                 if (ss):
                     val=ss.group(0)
                     #print val
                     final_result = re.split(':',val)
-                    #print final_result[1]
+
                     #data_dict['recutc'] = int(time.time())
                     #arr_data[y] = float(final_result[1])
                     if ((final_result[0] == "errorcode1" or final_result[0] == "errorcode2") and final_result[1] > 0):
@@ -146,7 +148,6 @@ while True:
                             fault = final_result[1]
                     data_dict[ems_json[x]] = (final_result[1])
 
-		n = n+1
 
         #for j,i in enumerate(cmd_list):
             #print data_dict[i
@@ -155,11 +156,14 @@ while True:
             #print i
 
         #batchVal.append(data_dict)
-        data_dict['timestamp'] = str(int(time.time()))
-        print data_dict
-        time.sleep(FREQ)
-        rec_count += 1
-        batchVal.append(data_dict)
+        curtime = int(time.time())
+
+        if (curtime >= nexttime):
+            data_dict['timestamp'] = str(curtime)
+            nexttime = (curtime + FREQ)
+            print data_dict
+            rec_count += 1
+            batchVal.append(data_dict)
 
         # Send live data into "'testout/'+devID" on demand triggered on
         # message with devID same as the devicedID in "'testout/'+devID"
@@ -167,7 +171,7 @@ while True:
                 if (time.time() - clkStart) < 300:
                     data['type']="dataLive"
                     data['deviceid']=devID
-                    data['bus']="ems2.4"
+                    data['bus']=BUSTYPE
                     data['data']=data_dict
                     live_payload = json.dumps(data)
                     client.publish('test/liveData', live_payload, qos=1)
@@ -181,7 +185,7 @@ while True:
         if rec_count == BATCH_TOTAL:
             data['type']="data"
             data['deviceid']=devID
-            data['bus']="ems2.4"
+            data['bus']=BUSTYPE
             data['data'] = batchVal
             payload = json.dumps(data)
             client.publish('test/batchData', payload, qos=1)        # Send The batched data to topic "batch/test"
@@ -196,7 +200,7 @@ while True:
             data.clear()
             data['type']="faultData"
             data['deviceid']=devID
-            data['bus']="ems2.4"
+            data['bus']=BUSTYPE
             data['data'] = batchVal
             payload = json.dumps(data)
             client.publish('test/faultData', payload, qos=1)
