@@ -28,7 +28,7 @@ prvfault=0
 MQTT_PORT = 8883
 MQTT_KEEPALIVE_INTERVAL = 45
 BATCH_TOTAL=66
-FREQ=5
+FREQ=4
 BUSTYPE="EMS1.0"
 
 MQTT_HOST = "a1qvp87d3vdcq7-ats.iot.us-west-2.amazonaws.com"
@@ -108,6 +108,7 @@ ems_json =      {"errorcode1":"em2",
                 "selburnerpow":"em13",
                 "curboilerperfm":"em15"
                 }
+prv_val  = ["fr"]*15
 
 # Declaring list of datas to be stored and dictionary for indexing
 arr_data = [len(cmd_list)] * 0
@@ -133,6 +134,7 @@ while True:
         #for y in response:
         for x in cmd_list:
             xx = x+":.*"
+            data_dict[ems_json[x]] = prv_val[cmd_list.index(x)]
             #data_dict[ems_json[x]] = "fr"
             for i in response:
                 ss=re.search(xx,i,flags=0)
@@ -146,8 +148,9 @@ while True:
                     if ((final_result[0] == "errorcode1" or final_result[0] == "errorcode2") and final_result[1] > 0):
                         if (final_result[1] != fault):
                             fault = final_result[1]
+                    prv_val[cmd_list.index(x)] = final_result[1]  
                     data_dict[ems_json[x]] = (final_result[1])
-
+                    
 
         #for j,i in enumerate(cmd_list):
             #print data_dict[i
@@ -158,7 +161,7 @@ while True:
         #batchVal.append(data_dict)
         curtime = int(time.time())
 
-        if (curtime >= nexttime):
+        if (curtime > nexttime):
             data_dict['timestamp'] = str(curtime)
             nexttime = (curtime + FREQ)
             print data_dict
