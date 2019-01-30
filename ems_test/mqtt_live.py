@@ -119,7 +119,8 @@ data = {}       # Store data for the JSON payload
 # Loop to get the boiler parameters and temporarily store in a list before storing in a dictionary
 rec_count = 0
 curtime = int (time.time())
-nexttime = curtime + FREQ 
+nexttime = curtime + FREQ
+
 for x in cmd_list:
     data_dict[ems_json[x]] = "fr"
 while True:
@@ -127,6 +128,7 @@ while True:
         if (ser.isOpen == False):
             ser.open()
         response = serialport.readlines()
+		#print "serialdata"
         #response = str(response)
         response = [i.replace("\r\n","") for i in response]
         print response
@@ -148,9 +150,9 @@ while True:
                     if ((final_result[0] == "errorcode1" or final_result[0] == "errorcode2") and final_result[1] > 0):
                         if (final_result[1] != fault):
                             fault = final_result[1]
-                    prv_val[cmd_list.index(x)] = final_result[1]  
-                    data_dict[ems_json[x]] = (final_result[1])
-                    
+                    prv_val[cmd_list.index(x)] = final_result[1]
+                    data_dict[ems_json[x]] = str(final_result[1])
+
 
         #for j,i in enumerate(cmd_list):
             #print data_dict[i
@@ -161,7 +163,7 @@ while True:
         #batchVal.append(data_dict)
         curtime = int(time.time())
 
-        if (curtime > nexttime):
+        if (curtime >= nexttime):
             data_dict['timestamp'] = str(curtime)
             nexttime = (curtime + FREQ)
             print data_dict

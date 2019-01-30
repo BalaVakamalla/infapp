@@ -28,7 +28,8 @@ prvfault=0
 MQTT_PORT = 8883
 MQTT_KEEPALIVE_INTERVAL = 45
 BATCH_TOTAL=66
-FREQ=5
+FREQ=4
+BUSTYPE="OT2.4"
 
 MQTT_HOST = "a1qvp87d3vdcq7-ats.iot.us-west-2.amazonaws.com"
 CA_ROOT_CERT_FILE = "/"+ devID +"/certs/root.ca.pem"
@@ -97,6 +98,8 @@ ot_json =      {"OEMdiagcode":"op7",
                 "appfaultcode":"op6",
 		"oemfault":"op8"}
 
+prv_val = ["fr"]*15
+
 # Declaring list of datas to be stored and dictionary for indexing
 arr_data = [len(cmd_list)] * 0
 data_dict = {}
@@ -105,22 +108,24 @@ data = {}       # Store data for the JSON payload
 
 # Loop to get the boiler parameters and temporarily store in a list before storing in a dictionary
 rec_count = 0
-n = 0
+curtime = int (time.time())
+nexttime = curtime + FREQ
+
 while True:
 
         if (ser.isOpen == False):
             ser.open()
         response = serialport.readlines()
-        print "serialdata"
+        #print "serialdata"
         #response = str(response)
         response = [i.replace("\r\n","") for i in response]
         print response
 
-        n = 0
         #for y in response:
         for x in cmd_list:
             xx = x+"=.*"
-	    data_dict[ot_json[x]] = "fr"
+			data_dict[ems_json[x]] = prv_val[cmd_list.index(x)]
+	    #data_dict[ot_json[x]] = "fr"
             for i in response:
                 ss=re.search(xx,i,flags=0)
                 if (ss):
@@ -133,9 +138,10 @@ while True:
 		    if ((final_result[0] == "OEMdiagcode") and final_result[1] > 0):
                         if (final_result[1] != fault):
                             fault = final_result[1]
+					prv_val[cmd_list.index(x)] = final_result[1]
                     data_dict[ot_json[x]] = str(final_result[1])
 
-		n = n+1
+
 
         #for j,i in enumerate(cmd_list):
             #print data_dict[i
@@ -144,9 +150,12 @@ while True:
             #print i
 
         #batchVal.append(data_dict)
-        data_dict['timestamp'] = str(int(time.time()))
+		curtime = int(time.time())
+
+		if (curtime >= nexttime):
+        data_dict['timestamp'] = str(curtime)
+		nexttime = (curtime + FREQ)
         print data_dict
-        time.sleep(4)
         rec_count += 1
         batchVal.append(data_dict)
 
