@@ -28,7 +28,7 @@ prvfault=0
 MQTT_PORT = 8883
 MQTT_KEEPALIVE_INTERVAL = 45
 BATCH_TOTAL=66
-FREQ=4
+FREQ=5
 BUSTYPE="OT2.4"
 
 MQTT_HOST = "a1qvp87d3vdcq7-ats.iot.us-west-2.amazonaws.com"
@@ -98,7 +98,7 @@ ot_json =      {"OEMdiagcode":"op7",
                 "appfaultcode":"op6",
 		"oemfault":"op8"}
 
-prv_val = ["fr"]*15
+prv_val = ["fr"]*10
 
 # Declaring list of datas to be stored and dictionary for indexing
 arr_data = [len(cmd_list)] * 0
@@ -124,7 +124,7 @@ while True:
         #for y in response:
         for x in cmd_list:
             xx = x+"=.*"
-			data_dict[ems_json[x]] = prv_val[cmd_list.index(x)]
+	    data_dict[ot_json[x]] = prv_val[cmd_list.index(x)]
 	    #data_dict[ot_json[x]] = "fr"
             for i in response:
                 ss=re.search(xx,i,flags=0)
@@ -138,7 +138,7 @@ while True:
 		    if ((final_result[0] == "OEMdiagcode") and final_result[1] > 0):
                         if (final_result[1] != fault):
                             fault = final_result[1]
-					prv_val[cmd_list.index(x)] = final_result[1]
+	            prv_val[cmd_list.index(x)] = final_result[1]
                     data_dict[ot_json[x]] = str(final_result[1])
 
 
@@ -150,14 +150,14 @@ while True:
             #print i
 
         #batchVal.append(data_dict)
-		curtime = int(time.time())
+	curtime = int(time.time())
 
-		if (curtime >= nexttime):
-        data_dict['timestamp'] = str(curtime)
-		nexttime = (curtime + FREQ)
-        print data_dict
-        rec_count += 1
-        batchVal.append(data_dict)
+	if (curtime >= nexttime):
+            data_dict['timestamp'] = str(curtime)
+	    nexttime = (curtime + FREQ)
+            print data_dict
+            rec_count += 1
+            batchVal.append(data_dict)
 
         # Send live data into "'testout/'+devID" on demand triggered on
         # message with devID same as the devicedID in "'testout/'+devID"
