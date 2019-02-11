@@ -50,7 +50,7 @@ def on_message(client, userdata, msg):
         print("payload: "+str(msg.payload))
         data = json.loads(str(msg.payload))
         global send, clkStart
-        if data['devID'] == devID:
+        if data['deviceid'] == devID:
         	print("Device ID Match!!")
 		send = True
 		clkStart = time.time()
